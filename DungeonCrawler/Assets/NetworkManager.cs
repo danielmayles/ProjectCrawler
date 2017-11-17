@@ -102,9 +102,9 @@ public class NetworkManager : MonoBehaviour
                 break;
             case NetworkEventType.ConnectEvent:
                 NetworkPacket<String> testpacket = new NetworkPacket<String>();
-                testpacket.MessageType = NetworkPacketHeader.LocationChosen;
-                testpacket.packetContents = "Test";
-                SendPacket<String>(testpacket, testpacket.packetContents.Length);
+                //testpacket.MessageType = NetworkPacketHeader.LocationChosen;
+                //testpacket.packetContents = "Test";
+                //SendPacket<String>(testpacket, testpacket.packetContents.Length);
                 Debug.Log("Connect Event Received");
                 break;
             case NetworkEventType.DataEvent:
@@ -121,14 +121,7 @@ public class NetworkManager : MonoBehaviour
         NetworkPacketHeader packetHeader = (NetworkPacketHeader)BitConverter.ToInt32(packetData, 0);
         switch (packetHeader)
         {
-            case NetworkPacketHeader.HoloLensData:
-                break;
-
-            case NetworkPacketHeader.LocationChosen:
-                Stream stream = new MemoryStream(packetData, sizeof(NetworkPacketHeader), packetSize - sizeof(NetworkPacketHeader));
-                BinaryFormatter formatter = new BinaryFormatter();
-                string test = (string)formatter.Deserialize(stream);
-                Debug.Log(test);
-                break;
+            
         }
     }
+}

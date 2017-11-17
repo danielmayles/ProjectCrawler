@@ -264,7 +264,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c29bc6bf37d7f3d4caab2518896fe820, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Speed: 3
+  Speed: 6
   JumpForce: 8
 --- !u!1 &974823457
 GameObject:
@@ -281,7 +281,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &974823458
 Transform:
   m_ObjectHideFlags: 0
@@ -306,6 +306,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbd9ed175c9f4484496caef04f73b40c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MaxConnections: 100
+  IpAddress: localhost
+  socketPort: 8080
+  connectionSocketPort: 8080
+  AutoDiscoverServer: 0
+  packetSize: 1024
 --- !u!1 &1129514278
 GameObject:
   m_ObjectHideFlags: 0
