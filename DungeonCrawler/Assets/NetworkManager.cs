@@ -13,24 +13,37 @@ public enum NetworkPacketHeader
 }
 
 [Serializable]
-public struct NetworkPacket<T>
+public struct NetworkPacket
 {
     public NetworkPacketHeader MessageType;
-    public T packetContents;
+    public byte[] Data;
+    public int DataSize;
 }
 
 public class NetworkManager : MonoBehaviour
 {
+    public static NetworkManager Instance;
+
     public int MaxConnections = 100;
     public string IpAddress = "localhost";
     public int socketPort = 8080;
     public int connectionSocketPort = 8080;
-    public bool AutoDiscoverServer = false;
     public int packetSize = 1024;
 
-    private int myReliableChannelId;
+    private int ReliableSequencedChannelId;
+    private int ReliableChannelId;
+    private int UnreliableChannelId;
     int socketId;
-    int connectionId;
+    private bool NetworkActive = false;
+    private List<Connection> Connections = new List<Connection>();
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+    }
 
     void OnEnable()
     {
@@ -47,22 +60,29 @@ public class NetworkManager : MonoBehaviour
     {
         NetworkTransport.Init();
         ConnectionConfig config = new ConnectionConfig();
-        myReliableChannelId = config.AddChannel(QosType.ReliableSequenced);
+        ReliableSequencedChannelId = config.AddChannel(QosType.ReliableSequenced);
+        ReliableChannelId = config.AddChannel(QosType.Reliable);
+        UnreliableChannelId = config.AddChannel(QosType.Unreliable);
         HostTopology topology = new HostTopology(config, MaxConnections);
         socketId = NetworkTransport.AddHost(topology, socketPort);
     }
 
     void Connect()
     {
-        byte error;
-        connectionId = NetworkTransport.Connect(socketId, IpAddress, connectionSocketPort, 0, out error);
-        if ((NetworkError)error != NetworkError.Ok)
+        byte error;    
+        int ConnectionID = NetworkTransport.Connect(socketId, IpAddress, connectionSocketPort, 0, out error);
+        
+        if((NetworkError)error == NetworkError.Ok)
+        {
+            AddConnection(ConnectionID);
+        }
+        else
         {
             Debug.Log("NetworkManager Could Not Connect");
         }
     }
 
-    void SendPacket<T>(NetworkPacketHeader packetHeader, byte[] packetData)
+    public void SendPacket(int ConnectionIndex, NetworkPacketHeader packetHeader, byte[] packetData)
     {
         byte error;
         byte[] buffer = new byte[packetSize];
@@ -71,57 +91,79 @@ public class NetworkManager : MonoBehaviour
         Array.Copy(messageType, buffer, sizeof(NetworkPacketHeader));
         Array.Copy(packetData, 0, buffer, sizeof(NetworkPacketHeader), packetData.Length);
 
-        NetworkTransport.Send(socketId, connectionId, myReliableChannelId, buffer, packetSize, out error);
+        NetworkTransport.Send(socketId, Connections[ConnectionIndex].ConnectionID, ReliableSequencedChannelId, buffer, packetSize, out error);
     }
 
-    void SendPacket<T>(NetworkPacket<T> packet, int sizeOfPacketContents)
+    public void SendPacket(int ConnectionIndex, NetworkPacket packet, int sizeOfPacketContents)
     {
         byte error;
-        byte[] buffer = new byte[packetSize];
-        Array.Copy(BitConverter.GetBytes((int)packet.MessageType), buffer, sizeof(NetworkPacketHeader));
-
-        Stream stream = new MemoryStream(buffer, sizeof(NetworkPacketHeader), packetSize - sizeof(NetworkPacketHeader));
-        BinaryFormatter formatter = new BinaryFormatter();
-        formatter.Serialize(stream, packet.packetContents);
-
-        NetworkTransport.Send(socketId, connectionId, myReliableChannelId, buffer, packetSize, out error);
+        List<byte> NewPacket = new List<byte>();
+        NewPacket.AddRange(BitConverter.GetBytes((int)packet.MessageType));
+        NewPacket.AddRange(BitConverter.GetBytes(packet.DataSize));
+        NewPacket.AddRange(packet.Data);
+        NetworkTransport.Send(socketId, Connections[ConnectionIndex].ConnectionID, ReliableSequencedChannelId, NewPacket.ToArray(), packetSize, out error);
     }
 
-    void Update()
+    public void StartNetworking()
     {
-        int recHostId;
-        int recConnectionId;
-        int recChannelId;
-        byte[] recBuffer = new byte[packetSize];
-        int dataSize;
-        byte error;
-        NetworkEventType recNetworkEvent = NetworkTransport.Receive(out recHostId, out recConnectionId, out recChannelId, recBuffer, packetSize, out dataSize, out error);
-        switch (recNetworkEvent)
+        NetworkActive = true;
+        StartCoroutine(NetworkUpdate());
+    }
+
+    public void StopNetworking()
+    {
+        NetworkActive = false;
+    }
+
+    int AddConnection(int ConnectionID)
+    {
+        Connection NewConnection = new Connection(ConnectionID);
+        for(int i = 0; i < Connections.Count; i++)
         {
-            case NetworkEventType.Nothing:
-                break;
-            case NetworkEventType.ConnectEvent:
-                NetworkPacket<String> testpacket = new NetworkPacket<String>();
-                //testpacket.MessageType = NetworkPacketHeader.LocationChosen;
-                //testpacket.packetContents = "Test";
-                //SendPacket<String>(testpacket, testpacket.packetContents.Length);
-                Debug.Log("Connect Event Received");
-                break;
-            case NetworkEventType.DataEvent:
-                ReadPacket(recBuffer);
-                break;
-            case NetworkEventType.DisconnectEvent:
-                Debug.Log("remote client event disconnected");
-                break;
+            if(Connections[i].isActive == false)
+            {
+                Connections[i] = NewConnection;
+                return i;
+            }
         }
+
+        int ConnectionIndex = Connections.Count;
+        Connections.Add(NewConnection);
+        return ConnectionIndex;
     }
 
-    void ReadPacket(byte[] packetData)
+    void RemoveConnection(int ConnectionIndex)
     {
-        NetworkPacketHeader packetHeader = (NetworkPacketHeader)BitConverter.ToInt32(packetData, 0);
-        switch (packetHeader)
+        Connections[ConnectionIndex].isActive = false;
+    }
+
+    IEnumerator NetworkUpdate()
+    { 
+        while (NetworkActive)
         {
-            
+            int recHostId;
+            int recConnectionId;
+            int recChannelId;
+            byte[] recBuffer = new byte[packetSize];
+            int dataSize;
+            byte error;
+            NetworkEventType recNetworkEvent = NetworkTransport.Receive(out recHostId, out recConnectionId, out recChannelId, recBuffer, packetSize, out dataSize, out error);
+            switch (recNetworkEvent)
+            {
+                case NetworkEventType.Nothing:
+                    break;
+                case NetworkEventType.ConnectEvent:
+                    Debug.Log("Connect Event Received");
+                    break;
+                case NetworkEventType.DataEvent:
+                    NetworkPacketReader.Instance.ReadPacket(recBuffer);
+                    break;
+                case NetworkEventType.DisconnectEvent:
+                    Debug.Log("remote client event disconnected");
+
+                    break;
+            }
+            yield return new WaitForEndOfFrame();
         }
     }
 }
