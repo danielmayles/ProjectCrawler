@@ -15,12 +15,12 @@ public class NetworkPacketReader : MonoBehaviour
         }
     }
 
-    public void ReadPacket(byte[] packetData)
+    public void ReadPacket(NetworkPacketHeader Header, byte[] packetData)
     {
         NetworkPacketHeader packetHeader = (NetworkPacketHeader)BitConverter.ToInt32(packetData, 0);
         switch (packetHeader)
         {
-
+            
         }
     }
 }
