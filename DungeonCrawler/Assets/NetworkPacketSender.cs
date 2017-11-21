@@ -7,33 +7,36 @@ public class NetworkPacketSender : MonoBehaviour
 {
     public void RelayPacketToAllPlayers(NetworkPacket Packet, QosType QualityOfServiceType)
     {
-        int AmountOfConnections = NetworkManager.Instance.GetAmountOfConnections();
+        int AmountOfConnections = PlayerManager.Instance.GetAmountOfPlayers();
         switch (QualityOfServiceType)
         {
             case QosType.Unreliable:
                 for(int i = 0; i < AmountOfConnections; i++)
                 {
-                    NetworkManager.Instance.SendPacketUnreliable(i, Packet);
+                    Packet.IntendedRecipientConnectionID = PlayerManager.Instance.GetPlayer(i).GetPlayerConnectionID();
+                    ClientNetworkManager.Instance.SendPacketToServerUnreliable(Packet);
                 }
                 break;
 
             case QosType.Reliable:
                 for (int i = 0; i < AmountOfConnections; i++)
                 {
-                    NetworkManager.Instance.SendPacketReliable(i, Packet);
+                    Packet.IntendedRecipientConnectionID = PlayerManager.Instance.GetPlayer(i).GetPlayerConnectionID();
+                    ClientNetworkManager.Instance.SendPacketToServerReliable(Packet);
                 }
                 break;
 
             case QosType.ReliableSequenced:
                 for (int i = 0; i < AmountOfConnections; i++)
                 {
-                    NetworkManager.Instance.SendPacketReliableSequenced(i, Packet);
+                    Packet.IntendedRecipientConnectionID = PlayerManager.Instance.GetPlayer(i).GetPlayerConnectionID();
+                    ClientNetworkManager.Instance.SendPacketToServerReliableSequenced(Packet);
                 }
                 break;
         }
     }
 
-    public void RelayPacketToNearByPlayers(NetworkPacket Packet, Room RoomSentFrom, QosType QualityOfServiceType)
+    public void RelayPacketToNearbyPlayers(NetworkPacket Packet, Room RoomSentFrom, QosType QualityOfServiceType)
     {
         Character[] Players = RoomSentFrom.GetPlayersAndNearbyPlayers();
 
@@ -42,21 +45,24 @@ public class NetworkPacketSender : MonoBehaviour
             case QosType.Unreliable:
                 for (int i = 0; i < Players.Length; i++)
                 {
-                    NetworkManager.Instance.SendPacketUnreliable(Players[i].GetPlayerConnectionID(), Packet);
+                    Packet.IntendedRecipientConnectionID = Players[i].GetPlayerConnectionID();
+                    ClientNetworkManager.Instance.SendPacketToServerUnreliable(Packet);
                 }
                 break;
 
             case QosType.Reliable:
                 for (int i = 0; i < Players.Length; i++)
                 {
-                    NetworkManager.Instance.SendPacketReliable(Players[i].GetPlayerConnectionID(), Packet);
+                    Packet.IntendedRecipientConnectionID = Players[i].GetPlayerConnectionID();
+                    ClientNetworkManager.Instance.SendPacketToServerReliable(Packet);
                 }
                 break;
 
             case QosType.ReliableSequenced:
                 for (int i = 0; i < Players.Length; i++)
                 {
-                    NetworkManager.Instance.SendPacketReliableSequenced(Players[i].GetPlayerConnectionID(), Packet);
+                    Packet.IntendedRecipientConnectionID = Players[i].GetPlayerConnectionID();
+                    ClientNetworkManager.Instance.SendPacketToServerReliableSequenced(Packet);
                 }
                 break;
         }
