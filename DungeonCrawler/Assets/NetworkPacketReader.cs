@@ -17,7 +17,7 @@ public class NetworkPacketReader : MonoBehaviour
 
     public void ReadPacket(NetworkPacket Packet)
     {
-        switch (Packet.MessageType)
+        switch (Packet.PacketHeader)
         {
             
         }

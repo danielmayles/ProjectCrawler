@@ -6,12 +6,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.Networking;
 
-[Serializable]
-public enum NetworkPacketHeader
-{
-    PlayerData,
-}
-
 public class ClientNetworkManager : MonoBehaviour
 {
     public static ClientNetworkManager Instance;
@@ -20,9 +14,9 @@ public class ClientNetworkManager : MonoBehaviour
     public int ServerPort = 8080;
     public int ReceivePacketSize = 2048;
 
-    private int ReliableSequencedChannelId;
-    private int ReliableChannelId;
-    private int UnreliableChannelId;
+    public int ReliableSequencedChannelId;
+    public int ReliableChannelId;
+    public int UnreliableChannelId;
     int socketId;
 
     private int ServerConnectionID;
@@ -75,37 +69,15 @@ public class ClientNetworkManager : MonoBehaviour
         }
     }
 
-    public void SendPacketToServerUnreliable(NetworkPacket packet)
+    public void SendPacketToServer(NetworkPacket packet, QosType ChannelType)
     {
         byte error;
         List<byte> NewPacket = new List<byte>();
         NewPacket.AddRange(BitConverter.GetBytes(packet.IntendedRecipientConnectionID));
-        NewPacket.AddRange(BitConverter.GetBytes((int)packet.MessageType));
+        NewPacket.AddRange(BitConverter.GetBytes((int)packet.PacketHeader));
         NewPacket.AddRange(BitConverter.GetBytes(packet.DataSize));
         NewPacket.AddRange(packet.Data);
-        NetworkTransport.Send(socketId, ServerConnectionID, UnreliableChannelId, NewPacket.ToArray(), NewPacket.Count, out error);
-    }
-
-    public void SendPacketToServerReliable(NetworkPacket packet)
-    {
-        byte error;
-        List<byte> NewPacket = new List<byte>();
-        NewPacket.AddRange(BitConverter.GetBytes(packet.IntendedRecipientConnectionID));
-        NewPacket.AddRange(BitConverter.GetBytes((int)packet.MessageType));
-        NewPacket.AddRange(BitConverter.GetBytes(packet.DataSize));
-        NewPacket.AddRange(packet.Data);
-        NetworkTransport.Send(socketId, ServerConnectionID, ReliableChannelId, NewPacket.ToArray(), NewPacket.Count, out error);
-    }
-
-    public void SendPacketToServerReliableSequenced(NetworkPacket packet)
-    {
-        byte error;
-        List<byte> NewPacket = new List<byte>();
-        NewPacket.AddRange(BitConverter.GetBytes(packet.IntendedRecipientConnectionID));
-        NewPacket.AddRange(BitConverter.GetBytes((int)packet.MessageType));
-        NewPacket.AddRange(BitConverter.GetBytes(packet.DataSize));
-        NewPacket.AddRange(packet.Data);
-        NetworkTransport.Send(socketId, ServerConnectionID, ReliableSequencedChannelId, NewPacket.ToArray(), NewPacket.Count, out error);
+        NetworkTransport.Send(socketId, ServerConnectionID, GetChannel(ChannelType), NewPacket.ToArray(), NewPacket.Count, out error);
     }
 
     public void StartNetworking()
@@ -123,6 +95,31 @@ public class ClientNetworkManager : MonoBehaviour
     //{
      //   return AmountOfActiveConnections;
     //}
+
+    public int GetChannel(QosType QOSChannel)
+    {
+        int ChannelID;
+        switch (QOSChannel)
+        {
+            case QosType.Reliable:
+                ChannelID = ReliableChannelId;
+                break;
+
+            case QosType.ReliableSequenced:
+                ChannelID = ReliableSequencedChannelId;
+                break;
+
+            case QosType.Unreliable:
+                ChannelID = UnreliableChannelId;
+                break;
+            default:
+                Debug.Log("QOS TYPE " + QOSChannel + " has not been implemented defaulting to Unreliable");
+                ChannelID = UnreliableChannelId;
+                break;
+        }
+
+        return ChannelID;
+    }
 
     IEnumerator NetworkUpdate()
     { 
@@ -145,7 +142,7 @@ public class ClientNetworkManager : MonoBehaviour
                 case NetworkEventType.DataEvent:
                     NetworkPacket RecPacket = new NetworkPacket();
                     RecPacket.IntendedRecipientConnectionID = BitConverter.ToInt32(recBuffer, 0);
-                    RecPacket.MessageType = (NetworkPacketHeader)BitConverter.ToInt32(recBuffer, 4);
+                    RecPacket.PacketHeader = (NetworkPacketHeader)BitConverter.ToInt32(recBuffer, 4);
                     RecPacket.DataSize = BitConverter.ToInt32(recBuffer, 8);
                     Array.Copy(recBuffer, 12, RecPacket.Data, 0, RecPacket.DataSize);
                     NetworkPacketReader.Instance.ReadPacket(RecPacket);

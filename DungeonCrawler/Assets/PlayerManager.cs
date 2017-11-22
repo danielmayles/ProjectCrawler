@@ -24,5 +24,4 @@ public class PlayerManager : MonoBehaviour
     {
         return Players.Count;
     }
-
 }

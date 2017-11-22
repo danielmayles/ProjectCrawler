@@ -219,10 +219,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\ClientNetworkManager.cs" />
     <Compile Include="Assets\Connection.cs" />
-    <Compile Include="Assets\NetworkManager.cs" />
+    <Compile Include="Assets\NetworkPacket.cs" />
     <Compile Include="Assets\NetworkPacketReader.cs" />
     <Compile Include="Assets\NetworkPacketSender.cs" />
+    <Compile Include="Assets\NetworkServer.cs" />
+    <Compile Include="Assets\PlayerManager.cs" />
+    <Compile Include="Assets\Room.cs" />
     <Compile Include="Assets\Scripts\Character.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
   </ItemGroup>
