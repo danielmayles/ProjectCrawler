@@ -143,11 +143,12 @@ public class ClientNetworkManager : MonoBehaviour
                     Debug.Log("Connect Event Received");
                     break;
                 case NetworkEventType.DataEvent:
-                    NetworkPacketHeader Header = (NetworkPacketHeader)BitConverter.ToInt32(recBuffer, 4);
-                    int DataSize = BitConverter.ToInt32(recBuffer, 8);
-                    byte[] data = new byte[DataSize];
-                    Array.Copy(recBuffer, 12, data, 0, DataSize);
-                    NetworkPacketReader.Instance.ReadPacket(Header, data);
+                    NetworkPacket RecPacket = new NetworkPacket();
+                    RecPacket.IntendedRecipientConnectionID = BitConverter.ToInt32(recBuffer, 0);
+                    RecPacket.MessageType = (NetworkPacketHeader)BitConverter.ToInt32(recBuffer, 4);
+                    RecPacket.DataSize = BitConverter.ToInt32(recBuffer, 8);
+                    Array.Copy(recBuffer, 12, RecPacket.Data, 0, RecPacket.DataSize);
+                    NetworkPacketReader.Instance.ReadPacket(RecPacket);
                     break;
                 case NetworkEventType.DisconnectEvent:
                     Debug.Log("remote client event disconnected");
