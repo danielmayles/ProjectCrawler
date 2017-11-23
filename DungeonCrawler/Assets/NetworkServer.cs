@@ -7,8 +7,7 @@ using UnityEngine.Networking;
 [Serializable]
 public enum NetworkPacketHeader
 {
-    PlayerData,
-    PlayerConnectionID
+    InitPlayer,
 }
 
 public class NetworkServer : MonoBehaviour
@@ -47,11 +46,11 @@ public class NetworkServer : MonoBehaviour
     int AddConnection(int ConnectionID)
     {
         NetworkPacket Packet = new NetworkPacket();
-        Packet.PacketHeader = NetworkPacketHeader.PlayerConnectionID;
+        Packet.PacketHeader = NetworkPacketHeader.InitPlayer;
         Packet.Data = BitConverter.GetBytes(ConnectionID);
         Packet.DataSize = sizeof(int);
         SendPacketToAllClients(Packet, QosType.Reliable);
-        //QQQ Continue sending of connectionID and how to handle that i.e should I just spawn the player with the connectionID;
+        
         AmountOfActiveConnections++;
         Connection NewConnection = new Connection(ConnectionID);
         for (int i = 0; i < Connections.Count; i++)

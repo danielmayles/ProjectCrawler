@@ -19,7 +19,9 @@ public class NetworkPacketReader : MonoBehaviour
     {
         switch (Packet.PacketHeader)
         {
-            
+            case NetworkPacketHeader.InitPlayer:
+                int PlayersConnectionID = BitConverter.ToInt32(Packet.Data, 0);
+                break;
         }
     }
 }
