@@ -1,46 +1,43 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class ClientNetworkManager : MonoBehaviour
+[Serializable]
+public enum NetworkPacketHeader
 {
-    public static ClientNetworkManager Instance;
-    public int MaxConnections = 10;
-    public string ServerIpAddress = "localhost";
+    //QQQ ConnectionID to be sent seprate from spawning of players I think....
+    ConnectionID,
+    InitPlayer,
+}
+
+public class NetworkServer : MonoBehaviour
+{
+    public static NetworkServer Instance;
     public int ServerPort = 8080;
-    public int ReceivePacketSize = 2048;
+    public int MaxConnections = 100;
 
-    public int ReliableSequencedChannelId;
-    public int ReliableChannelId;
-    public int UnreliableChannelId;
-    int socketId;
+    private List<Connection> Connections = new List<Connection>();
+    private int AmountOfActiveConnections;
+    private int ReceivePacketSize = 2048;
+    private int ReliableSequencedChannelId;
+    private int ReliableChannelId;
+    private int UnreliableChannelId;
+    private int socketId;
 
-    private int ServerConnectionID;
-
-    private bool NetworkActive = false;
-    
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-        }
+        }  
     }
 
-    void OnEnable()
-    {
-        DontDestroyOnLoad(this);
-    }
-
-    void Start()
+    public void Start()
     {
         InitNetwork();
-        ConnectToServer();
-        StartNetworking();
+        StartCoroutine(NetworkUpdate());
     }
 
     void InitNetwork()
@@ -54,47 +51,75 @@ public class ClientNetworkManager : MonoBehaviour
         socketId = NetworkTransport.AddHost(topology, ServerPort);
     }
 
-    void ConnectToServer()
+    int AddConnection(int ConnectionID)
     {
-        byte error;    
-        int ConnectionID = NetworkTransport.Connect(socketId, ServerIpAddress, ServerPort, 0, out error);
+        NetworkPacket Packet = new NetworkPacket();
+        Packet.PacketHeader = NetworkPacketHeader.InitPlayer;
+        Packet.Data = BitConverter.GetBytes(ConnectionID);
+        Packet.DataSize = sizeof(int);
+        SendPacketToAllClients(Packet, QosType.Reliable);
         
-        if((NetworkError)error == NetworkError.Ok)
+        AmountOfActiveConnections++;
+        Connection NewConnection = new Connection(ConnectionID);
+        for (int i = 0; i < Connections.Count; i++)
         {
-            ServerConnectionID = ConnectionID;
+            if (Connections[i].isActive == false)
+            {
+                Connections[i] = NewConnection;
+                return i;
+            }
         }
-        else
+
+        int ConnectionIndex = Connections.Count;
+        Connections.Add(NewConnection);
+        return ConnectionIndex;
+    }
+
+    void RemoveConnection(int ConnectionID)
+    {
+        AmountOfActiveConnections--;
+        for (int i = 0; i < Connections.Count; i++)
         {
-            Debug.Log("NetworkManager Could Not Connect");
+            if (Connections[i].ConnectionID == ConnectionID)
+            {
+                Connections[i].isActive = false;
+            }
         }
     }
 
-    public void SendPacketToServer(NetworkPacket packet, QosType ChannelType)
+    public int GetAmountOfConnections()
+    {
+        return Connections.Count;
+    }
+
+    public void SendPacketToClient(NetworkPacket packet, int ChannelID)
     {
         byte error;
         List<byte> NewPacket = new List<byte>();
-        NewPacket.AddRange(BitConverter.GetBytes(packet.IntendedRecipientConnectionID));
         NewPacket.AddRange(BitConverter.GetBytes((int)packet.PacketHeader));
         NewPacket.AddRange(BitConverter.GetBytes(packet.DataSize));
         NewPacket.AddRange(packet.Data);
-        NetworkTransport.Send(socketId, ServerConnectionID, GetChannel(ChannelType), NewPacket.ToArray(), NewPacket.Count, out error);
+        NetworkTransport.Send(socketId, packet.IntendedRecipientConnectionID, ChannelID, NewPacket.ToArray(), NewPacket.Count, out error);
     }
 
-    public void StartNetworking()
+    public void SendPacketToClient(NetworkPacket packet, QosType ChannelType)
     {
-        NetworkActive = true;
-        StartCoroutine(NetworkUpdate());
+        byte error;
+        List<byte> NewPacket = new List<byte>();
+        NewPacket.AddRange(BitConverter.GetBytes((int)packet.PacketHeader));
+        NewPacket.AddRange(BitConverter.GetBytes(packet.DataSize));
+        NewPacket.AddRange(packet.Data);
+        NetworkTransport.Send(socketId, packet.IntendedRecipientConnectionID, GetChannel(ChannelType), NewPacket.ToArray(), NewPacket.Count, out error);
     }
 
-    public void StopNetworking()
+    public void SendPacketToAllClients(NetworkPacket Packet, QosType QualityOfServiceType)
     {
-        NetworkActive = false;
+        for(int i = 0; i < Connections.Count; i++)
+        {
+            Packet.IntendedRecipientConnectionID = Connections[i].ConnectionID;
+            SendPacketToClient(Packet, QualityOfServiceType);
+        }
     }
-
-   // public int GetAmountOfActiveConnections()
-    //{
-     //   return AmountOfActiveConnections;
-    //}
 
     public int GetChannel(QosType QOSChannel)
     {
@@ -117,13 +142,13 @@ public class ClientNetworkManager : MonoBehaviour
                 ChannelID = UnreliableChannelId;
                 break;
         }
-
         return ChannelID;
     }
 
     IEnumerator NetworkUpdate()
-    { 
-        while (NetworkActive)
+    {
+        bool ServerActive = true;
+        while (ServerActive)
         {
             int recHostId;
             int recConnectionId;
@@ -137,17 +162,20 @@ public class ClientNetworkManager : MonoBehaviour
                 case NetworkEventType.Nothing:
                     break;
                 case NetworkEventType.ConnectEvent:
+                    AddConnection(recConnectionId);
                     Debug.Log("Connect Event Received");
                     break;
                 case NetworkEventType.DataEvent:
                     NetworkPacket RecPacket = new NetworkPacket();
-                    RecPacket.IntendedRecipientConnectionID = BitConverter.ToInt32(recBuffer, 0);
+                    RecPacket.IntendedRecipientConnectionID = BitConverter.ToInt32(recBuffer, 0);                    
                     RecPacket.PacketHeader = (NetworkPacketHeader)BitConverter.ToInt32(recBuffer, 4);
                     RecPacket.DataSize = BitConverter.ToInt32(recBuffer, 8);
                     Array.Copy(recBuffer, 12, RecPacket.Data, 0, RecPacket.DataSize);
                     NetworkPacketReader.Instance.ReadPacket(RecPacket);
+                    SendPacketToClient(RecPacket, recChannelId);
                     break;
                 case NetworkEventType.DisconnectEvent:
+                    RemoveConnection(recHostId);
                     Debug.Log("remote client event disconnected");
                     break;
             }

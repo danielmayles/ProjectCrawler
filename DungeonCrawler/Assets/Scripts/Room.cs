@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class Room : MonoBehaviour
 {
-    private List<Character> PlayersInRoom = new List<Character>();
+    private List<Player> PlayersInRoom = new List<Player>();
     private List<Room> NearbyRooms = new List<Room>();
 
 
-    public Character[] GetPlayersAndNearbyPlayers()
+    public Player[] GetPlayersAndNearbyPlayers()
     {
-        List<Character> NearByPlayers = new List<Character>();
+        List<Player> NearByPlayers = new List<Player>();
         NearByPlayers.AddRange(PlayersInRoom);
         for(int i = 0; i < NearbyRooms.Count; i++)
         {
@@ -21,9 +21,9 @@ public class Room : MonoBehaviour
     }
 
 
-    public Character[] GetPlayersInRoom()
+    public Player[] GetPlayersInRoom()
     {
-        List<Character> Players = new List<Character>();
+        List<Player> Players = new List<Player>();
         Players.AddRange(PlayersInRoom);
         return Players.ToArray();
     }

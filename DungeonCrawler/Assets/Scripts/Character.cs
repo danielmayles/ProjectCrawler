@@ -9,22 +9,10 @@ public class Character : MonoBehaviour {
     protected bool isAlive;
     protected bool isOnFloor = false;
     protected Rigidbody2D rigidBody;
-    private int ConnectionID;
 
     private void Awake()
     {
         rigidBody = GetComponent<Rigidbody2D>();
-    }
-
-    public void SpawnPlayer(int PlayerConnectionID)
-    {
-        ConnectionID = PlayerConnectionID;
-        isAlive = true;
-    }
-
-    public int GetPlayerConnectionID()
-    {
-        return ConnectionID;
     }
     
     private void OnCollisionEnter2D(Collision2D collision)

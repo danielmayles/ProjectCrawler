@@ -21,6 +21,7 @@ public class NetworkPacketReader : MonoBehaviour
         {
             case NetworkPacketHeader.InitPlayer:
                 int PlayersConnectionID = BitConverter.ToInt32(Packet.Data, 0);
+                PlayerManager.Instance.AddPlayer(PlayersConnectionID);
                 break;
         }
     }

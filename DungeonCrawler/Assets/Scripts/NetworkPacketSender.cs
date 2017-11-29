@@ -17,7 +17,7 @@ public class NetworkPacketSender : MonoBehaviour
 
     public void RelayPacketToNearbyPlayers(NetworkPacket Packet, Room RoomSentFrom, QosType QualityOfServiceType)
     {
-        Character[] Players = RoomSentFrom.GetPlayersAndNearbyPlayers();
+        Player[] Players = RoomSentFrom.GetPlayersAndNearbyPlayers();
         for (int i = 0; i < Players.Length; i++)
         {
             Packet.IntendedRecipientConnectionID = Players[i].GetPlayerConnectionID();
