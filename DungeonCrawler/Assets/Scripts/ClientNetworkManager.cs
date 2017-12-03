@@ -144,7 +144,7 @@ public class ClientNetworkManager : MonoBehaviour
                     RecPacket.SetPacketTarget(BitConverter.ToInt32(recBuffer, 0));
                     RecPacket.PacketHeader = (NetworkPacketHeader)BitConverter.ToInt32(recBuffer, 4);
                     RecPacket.SetPacketData(recBuffer, 12, BitConverter.ToInt32(recBuffer, 8));
-                    NetworkPacketReader.Instance.ReadPacket(RecPacket, recConnectionId, false);
+                    NetworkPacketReader.ReadPacket(RecPacket, recConnectionId, false);
                     break;
                 case NetworkEventType.DisconnectEvent:
                     Debug.Log("remote client event disconnected");

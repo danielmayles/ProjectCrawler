@@ -9,7 +9,10 @@ public enum NetworkPacketHeader
 {
     ConnectionID,
     RequestConnectionID,
+    PlayerReady,
+    StartGame,
     SpawnPlayer,
+    SpawnRoom
 }
 
 public enum PacketTargets
@@ -117,6 +120,15 @@ public class NetworkServer : MonoBehaviour
         }
     }
 
+    public void SendPacketToAllClients(NetworkPacket Packet, int QosChannelID)
+    {
+        for (int i = 0; i < Connections.Count; i++)
+        {     
+            Packet.SetPacketTarget(Connections[i].ConnectionID);
+            SendPacketToClient(Packet, QosChannelID);  
+        }
+    }
+
     public int GetChannel(QosType QOSChannel)
     {
         int ChannelID;
@@ -165,7 +177,7 @@ public class NetworkServer : MonoBehaviour
                     RecPacket.SetPacketTarget(BitConverter.ToInt32(recBuffer, 0));                    
                     RecPacket.PacketHeader = (NetworkPacketHeader)BitConverter.ToInt32(recBuffer, 4);
                     RecPacket.SetPacketData(recBuffer, 12, BitConverter.ToInt32(recBuffer, 8));
-                    NetworkPacketReader.Instance.ReadPacket(RecPacket, recConnectionId, true);
+                    NetworkPacketReader.ReadPacket(RecPacket, recConnectionId, true);
               
                     if (RecPacket.GetPacketTarget()!= (int)PacketTargets.ServerOnly)
                     {

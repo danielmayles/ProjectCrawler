@@ -140,7 +140,9 @@ c2275a8bfbb9f9942cad75ecdfded41d UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.Spa
 45f3431f0103c41611e8d4eec3d439df UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.SpatialMappingRenderer
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.NetworkPacketSender
 9de3a22eca9aefadba2d10d5987cefe3 UnityEngine.SpatialTracking.dll:UnityEngine.SpatialTracking.TrackedPoseDriver
+8ebbe7a7fa193759c25fb9754037e6aa Assembly-CSharp.dll:.RoomManager
 60f702793716275fd990dbf57b0ea6e5 Assembly-CSharp.dll:.ControllerablePlayer
+05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.BattleRoyale_GameManager
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.Room
 f4c716750351514700c97dc0d70246d2 Assembly-CSharp.dll:.ClientNetworkManager
 60f702793716275fd990dbf57b0ea6e5 Assembly-CSharp.dll:.Player

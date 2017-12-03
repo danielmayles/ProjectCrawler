@@ -6,7 +6,21 @@ public class Room : MonoBehaviour
 {
     private List<Player> PlayersInRoom = new List<Player>();
     private List<Room> NearbyRooms = new List<Room>();
+    private Bounds RoomBounds;
 
+    private void Awake()
+    {
+        CalculateBounds();
+    }
+
+    public void CalculateBounds()
+    {
+        Renderer[] Renderers = GetComponentsInChildren<Renderer>();
+        for(int i = 0; i < Renderers.Length; i++)
+        {
+            RoomBounds.Encapsulate(Renderers[i].bounds);
+        }
+    }
 
     public Player[] GetPlayersAndNearbyPlayers()
     {
@@ -20,7 +34,6 @@ public class Room : MonoBehaviour
         return NearByPlayers.ToArray();
     }
 
-
     public Player[] GetPlayersInRoom()
     {
         List<Player> Players = new List<Player>();
@@ -28,5 +41,8 @@ public class Room : MonoBehaviour
         return Players.ToArray();
     }
 
-
+    public Vector2 GetRoomSize()
+    {
+        return RoomBounds.size;
+    }
 }
