@@ -19,7 +19,7 @@ public class PlayerManager : MonoBehaviour
         }
     }
     
-    public void AddPlayer(int ConnectionID)
+    public void SpawnPlayer(int ConnectionID)
     {
         Player player = Instantiate(PlayerPrefab, SpawnPoint.transform).GetComponent<Player>();
         player.InitPlayer(ConnectionID);
@@ -27,7 +27,7 @@ public class PlayerManager : MonoBehaviour
         Players.Add(player);
     }
 
-    public void AddControllerablePlayer(int ConnectionID)
+    public void SpawnControllerablePlayer(int ConnectionID)
     {
         Player player = Instantiate(ControllerablePlayerPrefab, SpawnPoint.transform).GetComponent<Player>();
         player.InitPlayer(ConnectionID);
@@ -35,9 +35,16 @@ public class PlayerManager : MonoBehaviour
         Players.Add(player);
     }
 
-    public Player GetPlayer(int PlayerIndex)
+    public Player GetPlayer(int ConnectionID)
     {
-        return Players[PlayerIndex];
+        for(int i = 0; i < Players.Count; i++)
+        {
+            if(Players[i].GetPlayerConnectionID() == ConnectionID)
+            {
+                return Players[i];
+            }
+        }
+        return null;
     }
 
     public int GetAmountOfPlayers()

@@ -20,7 +20,6 @@ public class ClientNetworkManager : MonoBehaviour
     int socketId;
 
     private int ServerConnectionID;
-
     private bool NetworkActive = false;
     
     private void Awake()
@@ -72,12 +71,7 @@ public class ClientNetworkManager : MonoBehaviour
     public void SendPacketToServer(NetworkPacket packet, QosType ChannelType)
     {
         byte error;
-        List<byte> NewPacket = new List<byte>();
-        NewPacket.AddRange(BitConverter.GetBytes(packet.IntendedRecipientConnectionID));
-        NewPacket.AddRange(BitConverter.GetBytes((int)packet.PacketHeader));
-        NewPacket.AddRange(BitConverter.GetBytes(packet.DataSize));
-        NewPacket.AddRange(packet.Data);
-        NetworkTransport.Send(socketId, ServerConnectionID, GetChannel(ChannelType), NewPacket.ToArray(), NewPacket.Count, out error);
+        NetworkTransport.Send(socketId, ServerConnectionID, GetChannel(ChannelType), packet.GetBytes(), packet.GetTotalPacketSize(), out error);
     }
 
     public void StartNetworking()
@@ -138,14 +132,19 @@ public class ClientNetworkManager : MonoBehaviour
                     break;
                 case NetworkEventType.ConnectEvent:
                     Debug.Log("Connect Client Event Received");
+
+                    //Requests own ConnectionID From Server
+                    NetworkPacket packet = ScriptableObject.CreateInstance<NetworkPacket>();
+                    packet.PacketHeader = NetworkPacketHeader.RequestConnectionID;
+                    packet.SetPacketTarget(PacketTargets.ServerOnly);
+                    SendPacketToServer(packet, QosType.Reliable);
                     break;
                 case NetworkEventType.DataEvent:
-                    NetworkPacket RecPacket = new NetworkPacket();
-                    RecPacket.IntendedRecipientConnectionID = BitConverter.ToInt32(recBuffer, 0);
+                    NetworkPacket RecPacket = ScriptableObject.CreateInstance<NetworkPacket>();
+                    RecPacket.SetPacketTarget(BitConverter.ToInt32(recBuffer, 0));
                     RecPacket.PacketHeader = (NetworkPacketHeader)BitConverter.ToInt32(recBuffer, 4);
-                    RecPacket.DataSize = BitConverter.ToInt32(recBuffer, 8);
-                    Array.Copy(recBuffer, 12, RecPacket.Data, 0, RecPacket.DataSize);
-                    NetworkPacketReader.Instance.ReadPacket(RecPacket);
+                    RecPacket.SetPacketData(recBuffer, 12, BitConverter.ToInt32(recBuffer, 8));
+                    NetworkPacketReader.Instance.ReadPacket(RecPacket, recConnectionId, false);
                     break;
                 case NetworkEventType.DisconnectEvent:
                     Debug.Log("remote client event disconnected");

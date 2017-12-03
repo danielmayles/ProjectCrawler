@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Player : Character
 {
+    public Room CurrentRoom;
     private int ConnectionID;
 
     public void InitPlayer(int ConnectionID)
