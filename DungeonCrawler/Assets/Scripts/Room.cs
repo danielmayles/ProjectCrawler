@@ -7,10 +7,21 @@ public class Room : MonoBehaviour
     private List<Player> PlayersInRoom = new List<Player>();
     private List<Room> NearbyRooms = new List<Room>();
     private Bounds RoomBounds;
+    private int RoomIndex;
 
     private void Awake()
     {
         CalculateBounds();
+    }
+
+    public void SetRoomIndex(int newIndex)
+    {
+        RoomIndex = newIndex;
+    }
+
+    public int GetRoomIndex()
+    {
+        return RoomIndex;
     }
 
     public void CalculateBounds()

@@ -26,7 +26,7 @@ public class NetworkPacketReader : MonoBehaviour
 
             case NetworkPacketHeader.PlayerReady:
                 int ReadyPlayerConnectionID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
-                BattleRoyale_GameManager.Instance.PlayerReady();
+                BattleRoyale_GameManager.Instance.PlayerReady(ReadyPlayerConnectionID);
                 break;
 
             case NetworkPacketHeader.StartGame:
@@ -39,19 +39,26 @@ public class NetworkPacketReader : MonoBehaviour
                 int RoomIndex = BitConverter.ToInt32(data, 0);
                 int RoomPrefabIndex = BitConverter.ToInt32(data, 4);
                 Vector3 RoomPosition = Serializer.DeserializeToVector3(data, 8);
-                RoomManager.Instance.SpawnRoom(RoomIndex, RoomPrefabIndex, RoomPosition);
+                RoomManager.Instance.SetNewRoom(RoomIndex, RoomPrefabIndex, RoomPosition);
                 break;
 
             case NetworkPacketHeader.SpawnPlayer:
                 int PlayerConnectionID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
+                int SpawnRoomIndex = BitConverter.ToInt32(Packet.GetPacketData(), 4);
                 if (PlayerConnectionID == NetworkDetails.GetLocalConnectionID())
                 {
-                    PlayerManager.Instance.SpawnControllerablePlayer(PlayerConnectionID);
+                    PlayerManager.Instance.SpawnControllerablePlayer(PlayerConnectionID, SpawnRoomIndex);
                 }
                 else
                 {
-                    PlayerManager.Instance.SpawnPlayer(PlayerConnectionID);
+                    PlayerManager.Instance.SpawnPlayer(PlayerConnectionID, SpawnRoomIndex);
                 }
+                break;
+
+            case NetworkPacketHeader.PlayerPosition:
+                int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
+                Vector3 position = Serializer.DeserializeToVector3(Packet.GetPacketData(), 4);
+                PlayerManager.Instance.GetPlayer(PlayerID).SetPosition(position);
                 break;
         }
     }

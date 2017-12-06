@@ -12,7 +12,8 @@ public enum NetworkPacketHeader
     PlayerReady,
     StartGame,
     SpawnPlayer,
-    SpawnRoom
+    SpawnRoom,
+    PlayerPosition
 }
 
 public enum PacketTargets
@@ -93,7 +94,7 @@ public class NetworkServer : MonoBehaviour
 
     public int GetAmountOfConnections()
     {
-        return Connections.Count;
+        return AmountOfActiveConnections;
     }
 
     public void SendPacketToClient(NetworkPacket packet, int QosChannelID)

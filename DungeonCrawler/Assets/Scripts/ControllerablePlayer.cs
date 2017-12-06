@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class ControllerablePlayer : Player
 {
+    private Vector3 OldPos;
+
+    protected void Start()
+    {
+        isAlive = true;
+        base.Start();
+    }
+
     void Update()
     {
         if (isAlive)
@@ -17,12 +25,18 @@ public class ControllerablePlayer : Player
             {
                 MovementAmount.x += Speed * Time.deltaTime;
             }
-            if (Input.GetKeyDown(KeyCode.Space) && isOnFloor)
+            if(Input.GetKey(KeyCode.Space))
             {
-                rigidBody.AddForce(new Vector2(0, JumpForce), ForceMode2D.Impulse);
+                Ragdoll();
             }
 
             transform.position += MovementAmount;
+            CharacterModel.transform.forward = MovementAmount.normalized + (Vector3.forward * -1);
+            if (transform.position != OldPos)
+            {
+                NetworkPacketSender.SendPlayerPosition(GetPlayerConnectionID(), transform.position);
+                OldPos = transform.position;
+            }
         }
     }
 }

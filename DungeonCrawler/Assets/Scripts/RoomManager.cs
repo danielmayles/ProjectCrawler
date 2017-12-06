@@ -6,10 +6,10 @@ public class RoomManager : MonoBehaviour
 {
     public GameObject[] RoomPrefabs;
     public int AmountOfRoomsHeigh;
-    public int AmountOfRoomsWidth;
-
-    private Room[] Rooms;
+    public int AmountOfRoomsWidth; 
     public static RoomManager Instance;
+    private List<Room> Rooms = new List<Room>();
+    private Vector3 CurrentRoomSpawnPoint = Vector3.zero;
 
     private void Awake()
     {
@@ -17,39 +17,40 @@ public class RoomManager : MonoBehaviour
         {
             Instance = this;
         }
-        Rooms = new Room[AmountOfRoomsHeigh * AmountOfRoomsWidth];
     }
 
-    public void StartSpawnRooms()
+    public Room AddNewRoom(bool ReplicateOverNetwork = false)
     {
-        StartCoroutine(SpawnRooms());
-    }
-
-    public IEnumerator SpawnRooms()
-    {
-        Vector3 CurrentSpawnPoint = Vector3.zero;  
-        int CurrentRoomIndex = 0;
-     
-        for (int y = 0; y < AmountOfRoomsHeigh; y++)
+        int RoomPrefabIndex = Random.Range(0, RoomPrefabs.Length);
+        Room newRoom = SpawnRoom(Rooms.Count, RoomPrefabIndex, CurrentRoomSpawnPoint);
+        if (ReplicateOverNetwork)
         {
-            for (int x = 0; x < AmountOfRoomsWidth; x++)
-            {
-                CurrentRoomIndex = x + y;
-                int RoomPrefabIndex = Random.Range(0, RoomPrefabs.Length);
-                SpawnRoom(CurrentRoomIndex, RoomPrefabIndex, CurrentSpawnPoint);
-                NetworkPacketSender.SendSpawnRoom(CurrentRoomIndex, RoomPrefabIndex, CurrentSpawnPoint);
-                CurrentSpawnPoint.x += Rooms[CurrentRoomIndex].GetRoomSize().x;
-            }
-            CurrentSpawnPoint.x = 0;
-            CurrentSpawnPoint.y += Rooms[CurrentRoomIndex].GetRoomSize().y;
-            yield return new WaitForEndOfFrame();
+            NetworkPacketSender.SendSpawnRoom(newRoom.GetRoomIndex(), RoomPrefabIndex, CurrentRoomSpawnPoint);
         }
+        Rooms.Add(newRoom);
+        return newRoom;
     }
 
-    public void SpawnRoom(int RoomIndex, int RoomPrefabIndex, Vector3 SpawnPosition)
+    public Room GetRoom(int RoomIndex)
     {
-        Debug.Log("Room Index " + RoomIndex);
-        Debug.Log("Room Prefab Index " + RoomPrefabIndex);
-        Rooms[RoomIndex] = Instantiate(RoomPrefabs[RoomPrefabIndex], SpawnPosition, RoomPrefabs[RoomPrefabIndex].transform.rotation, transform).GetComponent<Room>();
+        return Rooms[RoomIndex];
+    }
+     
+    public void SetNewRoom(int RoomIndex, int RoomPrefabIndex, Vector3 Position)
+    {
+        if(Rooms.Count <= RoomIndex)
+        {
+            Room[] newRoomElements = new Room[RoomIndex - (Rooms.Count - 1)];
+            Rooms.AddRange(newRoomElements);
+        }
+
+        Rooms[RoomIndex] = SpawnRoom(RoomIndex, RoomPrefabIndex, Position);
+    }
+
+    Room SpawnRoom(int RoomIndex, int RoomPrefabIndex, Vector3 SpawnPosition)
+    {
+        Room newRoom = Instantiate(RoomPrefabs[RoomPrefabIndex], SpawnPosition, RoomPrefabs[RoomPrefabIndex].transform.rotation, transform).GetComponent<Room>();
+        newRoom.SetRoomIndex(RoomIndex);
+        return newRoom;
     }
 }

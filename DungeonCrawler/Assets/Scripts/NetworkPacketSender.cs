@@ -48,11 +48,14 @@ public class NetworkPacketSender : MonoBehaviour
         SendToServerOnly(networkPacket, QosType.Reliable);
     }
 
-    public static void SendSpawnPlayer(int PlayerConnectionID)
+    public static void SendSpawnPlayer(int PlayerConnectionID, int RoomIndex)
     {
         NetworkPacket networkPacket = ScriptableObject.CreateInstance<NetworkPacket>();
         networkPacket.PacketHeader = NetworkPacketHeader.SpawnPlayer;
-        networkPacket.SetPacketData(BitConverter.GetBytes(PlayerConnectionID), 0, sizeof(int));
+        List<byte> data = new List<byte>();
+        data.AddRange(BitConverter.GetBytes(PlayerConnectionID));
+        data.AddRange(BitConverter.GetBytes(RoomIndex));
+        networkPacket.SetPacketData(data.ToArray(), 0, data.Count);
         SendPacketToAllPlayers(networkPacket, QosType.Reliable);
     }
 
@@ -66,5 +69,16 @@ public class NetworkPacketSender : MonoBehaviour
         data.AddRange(Serializer.GetBytes(Position));
         networkPacket.SetPacketData(data.ToArray(), 0, data.Count);
         SendPacketToAllPlayers(networkPacket, QosType.Reliable);
+    }
+
+    public static void SendPlayerPosition(int PlayerConnectionID, Vector3 NewPosition)
+    {
+        NetworkPacket networkPacket = ScriptableObject.CreateInstance<NetworkPacket>();
+        networkPacket.PacketHeader = NetworkPacketHeader.PlayerPosition;
+        List<byte> data = new List<byte>();
+        data.AddRange(BitConverter.GetBytes(PlayerConnectionID));
+        data.AddRange(Serializer.GetBytes(NewPosition));
+        networkPacket.SetPacketData(data.ToArray(), 0, data.Count);
+        SendPacketToAllPlayers(networkPacket, QosType.Unreliable);
     }
 }

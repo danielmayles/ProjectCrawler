@@ -7,7 +7,6 @@ public class PlayerManager : MonoBehaviour
     public static PlayerManager Instance;
     public GameObject PlayerPrefab;
     public GameObject ControllerablePlayerPrefab;
-    public GameObject SpawnPoint;
 
     private List<Player> Players = new List<Player>();
     
@@ -19,20 +18,26 @@ public class PlayerManager : MonoBehaviour
         }
     }
     
-    public void SpawnPlayer(int ConnectionID)
+    public void SpawnPlayer(int ConnectionID, int RoomIndex)
     {
-        Player player = Instantiate(PlayerPrefab, SpawnPoint.transform).GetComponent<Player>();
+        Player player = Instantiate(PlayerPrefab, RoomManager.Instance.GetRoom(RoomIndex).transform.position, Quaternion.identity, transform).GetComponent<Player>();
         player.InitPlayer(ConnectionID);
         player.SetAlive();
         Players.Add(player);
     }
 
-    public void SpawnControllerablePlayer(int ConnectionID)
+    public void SpawnControllerablePlayer(int ConnectionID, int RoomIndex)
     {
-        Player player = Instantiate(ControllerablePlayerPrefab, SpawnPoint.transform).GetComponent<Player>();
+        Player player = Instantiate(ControllerablePlayerPrefab, RoomManager.Instance.GetRoom(RoomIndex).transform.position, Quaternion.identity, transform).GetComponent<Player>();
         player.InitPlayer(ConnectionID);
         player.SetAlive();
         Players.Add(player);
+    }
+
+    public void ServerSpawnPlayer(int ConnectionID, int RoomIndex)
+    {
+        SpawnPlayer(ConnectionID, RoomIndex);
+        NetworkPacketSender.SendSpawnPlayer(ConnectionID, RoomIndex);
     }
 
     public Player GetPlayer(int ConnectionID)

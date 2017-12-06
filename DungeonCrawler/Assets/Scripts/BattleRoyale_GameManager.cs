@@ -14,16 +14,14 @@ public class BattleRoyale_GameManager : MonoBehaviour
         }
     }
 
-    public void PlayerReady()
+    public void PlayerReady(int ConnectionID)
     {
-        SetupGame();
+        SpawnRoomAndPlayer(ConnectionID);
     }
 
-    public void SetupGame()
+    public void SpawnRoomAndPlayer(int ConnectionID)
     {
-        RoomManager.Instance.StartSpawnRooms();
-
-        //QQQ Do spawning players! 
-        NetworkPacketSender.SendSpawnPlayer()
+        Room NewRoom = RoomManager.Instance.AddNewRoom(true);
+        PlayerManager.Instance.ServerSpawnPlayer(ConnectionID, NewRoom.GetRoomIndex());
     }
 }

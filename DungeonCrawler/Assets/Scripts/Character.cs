@@ -4,18 +4,13 @@ using UnityEngine;
 
 public class Character : MonoBehaviour {
 
+    public GameObject CharacterModel;
     public float Speed;
     public float JumpForce;
     protected bool isAlive;
     protected bool isOnFloor = false;
-    protected Rigidbody2D rigidBody;
 
-    private void Awake()
-    {
-        rigidBody = GetComponent<Rigidbody2D>();
-    }
-    
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter(Collision2D collision)
     {
         if (collision.transform.tag == "Floor")
         {
@@ -23,7 +18,7 @@ public class Character : MonoBehaviour {
         }
     }
 
-    private void OnCollisionExit2D(Collision2D collision)
+    private void OnCollisionExit(Collision2D collision)
     {
         if (collision.transform.tag == "Floor")
         {
