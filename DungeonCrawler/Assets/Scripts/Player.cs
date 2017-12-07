@@ -19,15 +19,14 @@ public class Player : Character
     public Rigidbody RightLegRigidBody;
     public Rigidbody RightUpLegRigidBody;
 
-
-    public Rigidbody MiddleSpine;
-    public float HeadUprightForce;
-    public float SpineUprightForce;
-
+    public float MaxHeadUprightForce;
+    public float CurrentHeadUprightForce;
     private int ConnectionID;
+    protected bool isRagdolling;
 
     protected void Start()
     {
+        CurrentHeadUprightForce = MaxHeadUprightForce;
         StartCoroutine(UpdatePlayerPhysics());
     }
 
@@ -58,50 +57,32 @@ public class Player : Character
 
     public void Ragdoll()
     {
-        Rigidbody[] RagdollRigidBodies = GetComponentsInChildren<Rigidbody>();
-        for (int i = 0; i < RagdollRigidBodies.Length; i++)
-        {
-            RagdollRigidBodies[i].isKinematic = false;
-        }
-
-        Collider[] RagdollColliders = GetComponentsInChildren<Collider>();
-        for (int i = 0; i < RagdollColliders.Length; i++)
-        {
-            RagdollColliders[i].enabled = true;
-        }
+        isRagdolling = true;
+        HipRigidBody.isKinematic = false;
+        LeftLegRigidBody.isKinematic = false;
+        LeftUpLegRigidBody.isKinematic = false;
+        RightLegRigidBody.isKinematic = false;
+        RightUpLegRigidBody.isKinematic = false;
+        CurrentHeadUprightForce = 0;
     }
 
     public void StopRagdoll()
     {
-        Rigidbody[] RagdollRigidBodies = GetComponentsInChildren<Rigidbody>();
-        for (int i = 0; i < RagdollRigidBodies.Length; i++)
-        {
-            RagdollRigidBodies[i].isKinematic = true;
-        }
-
-        Collider[] RagdollColliders = GetComponentsInChildren<Collider>();
-        for (int i = 0; i < RagdollColliders.Length; i++)
-        {
-            RagdollColliders[i].enabled = false;
-        }
-    }
-
-    public void Awake()
-    {
-        DisableFullRagdoll();
-    }
-
-
-    void DisableFullRagdoll()
-    {
-       
+        CurrentHeadUprightForce = MaxHeadUprightForce;
+        isRagdolling = false;
+        HipRigidBody.isKinematic = true;
+        LeftLegRigidBody.isKinematic = true;
+        LeftUpLegRigidBody.isKinematic = true;
+        RightLegRigidBody.isKinematic = true;
+        RightUpLegRigidBody.isKinematic = true;       
     }
 
     public IEnumerator UpdatePlayerPhysics()
     {
+        isAlive = true;
         while(isAlive)
         {
-            HeadRigidBody.AddForce(Vector3.up * HeadUprightForce, ForceMode.Force);
+            HeadRigidBody.AddForce(Vector3.up * CurrentHeadUprightForce, ForceMode.Force);
             yield return new WaitForEndOfFrame();
         }
     }
