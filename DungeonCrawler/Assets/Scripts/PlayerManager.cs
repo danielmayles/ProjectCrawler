@@ -20,7 +20,7 @@ public class PlayerManager : MonoBehaviour
     
     public void SpawnPlayer(int ConnectionID, int RoomIndex)
     {
-        Player player = Instantiate(PlayerPrefab, RoomManager.Instance.GetRoom(RoomIndex).transform.position, Quaternion.identity, transform).GetComponent<Player>();
+        Player player = Instantiate(PlayerPrefab, RoomManager.Instance.GetRoom(RoomIndex).transform.position, PlayerPrefab.transform.rotation, transform).GetComponent<Player>();
         player.InitPlayer(ConnectionID);
         player.SetAlive();
         Players.Add(player);
@@ -28,7 +28,7 @@ public class PlayerManager : MonoBehaviour
 
     public void SpawnControllerablePlayer(int ConnectionID, int RoomIndex)
     {
-        Player player = Instantiate(ControllerablePlayerPrefab, RoomManager.Instance.GetRoom(RoomIndex).transform.position, Quaternion.identity, transform).GetComponent<Player>();
+        Player player = Instantiate(ControllerablePlayerPrefab, RoomManager.Instance.GetRoom(RoomIndex).transform.position, ControllerablePlayerPrefab.transform.rotation, transform).GetComponent<Player>();
         player.InitPlayer(ConnectionID);
         player.SetAlive();
         Players.Add(player);

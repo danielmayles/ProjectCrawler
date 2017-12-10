@@ -10,7 +10,7 @@ public class Character : MonoBehaviour {
     protected bool isAlive;
     protected bool isOnFloor = false;
 
-    private void OnCollisionEnter(Collision2D collision)
+    private void OnCollisionEnter(Collision collision)
     {
         if (collision.transform.tag == "Floor")
         {
@@ -18,7 +18,7 @@ public class Character : MonoBehaviour {
         }
     }
 
-    private void OnCollisionExit(Collision2D collision)
+    private void OnCollisionExit(Collision collision)
     {
         if (collision.transform.tag == "Floor")
         {

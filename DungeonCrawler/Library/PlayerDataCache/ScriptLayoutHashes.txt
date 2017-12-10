@@ -76,7 +76,7 @@ f61c0793411f10cf5fbfa1473fef5ef2 UnityEngine.UI.dll:UnityEngine.UI.ToggleGroup
 86d36c43c53541d667100dc90b89cfba UnityEngine.UI.dll:UnityEngine.EventSystems.TouchInputModule
 1b8c02d0aa82fbf036a2b9b2d713eec3 UnityEngine.UI.dll:UnityEngine.UI.VerticalLayoutGroup
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.NetworkPacketReader
-a2d612afa0d90f75edf1d10832a65609 Assembly-CSharp.dll:.Character
+362bd488459e6b12c02db4f4b99236e1 Assembly-CSharp.dll:.Character
 05524b8f659e7bfe5756d1335fec24ba UnityEngine.Timeline.dll:UnityEngine.Timeline.ActivationPlayableAsset
 970a95104359198fe1a98ef48655de8c UnityEngine.Timeline.dll:UnityEngine.Timeline.ActivationTrack
 8144169769d51429c4aedc8b0f92d47b UnityEngine.Timeline.dll:UnityEngine.Timeline.AnimationPlayableAsset
@@ -141,8 +141,8 @@ c2275a8bfbb9f9942cad75ecdfded41d UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.Spa
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.NetworkPacketSender
 9de3a22eca9aefadba2d10d5987cefe3 UnityEngine.SpatialTracking.dll:UnityEngine.SpatialTracking.TrackedPoseDriver
 8ebbe7a7fa193759c25fb9754037e6aa Assembly-CSharp.dll:.RoomManager
-60f702793716275fd990dbf57b0ea6e5 Assembly-CSharp.dll:.ControllerablePlayer
+eb46c353d7148ca41699dfeb684941b7 Assembly-CSharp.dll:.ControllerablePlayer
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.BattleRoyale_GameManager
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.Room
 f4c716750351514700c97dc0d70246d2 Assembly-CSharp.dll:.ClientNetworkManager
-60f702793716275fd990dbf57b0ea6e5 Assembly-CSharp.dll:.Player
+eb46c353d7148ca41699dfeb684941b7 Assembly-CSharp.dll:.Player

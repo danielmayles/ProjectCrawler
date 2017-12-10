@@ -81,4 +81,48 @@ public class NetworkPacketSender : MonoBehaviour
         networkPacket.SetPacketData(data.ToArray(), 0, data.Count);
         SendPacketToAllPlayers(networkPacket, QosType.Unreliable);
     }
+
+    public static void SendPlayerTransform(int PlayerConnectionID, Transform PlayerTransform)
+    {
+        NetworkPacket networkPacket = ScriptableObject.CreateInstance<NetworkPacket>();
+        networkPacket.PacketHeader = NetworkPacketHeader.PlayerTransform;
+        List<byte> data = new List<byte>();
+        data.AddRange(BitConverter.GetBytes(PlayerConnectionID));
+        data.AddRange(Serializer.GetBytes(PlayerTransform.position));
+        data.AddRange(Serializer.GetBytes(PlayerTransform.eulerAngles));
+        networkPacket.SetPacketData(data.ToArray(), 0, data.Count);
+        SendPacketToAllPlayers(networkPacket, QosType.Unreliable);
+    }
+
+    public static void SendRagdollPlayer(int PlayerConnectionID)
+    {
+        NetworkPacket networkPacket = ScriptableObject.CreateInstance<NetworkPacket>();
+        networkPacket.PacketHeader = NetworkPacketHeader.RagdollPlayer;
+        List<byte> data = new List<byte>();
+        data.AddRange(BitConverter.GetBytes(PlayerConnectionID));
+        networkPacket.SetPacketData(data.ToArray(), 0, data.Count);
+        SendPacketToAllPlayers(networkPacket, QosType.Reliable);
+    }
+
+    public static void SendStopRagdollPlayer(int PlayerConnectionID, Vector3 RagdollPosition)
+    {
+        NetworkPacket networkPacket = ScriptableObject.CreateInstance<NetworkPacket>();
+        networkPacket.PacketHeader = NetworkPacketHeader.StopPlayerRagdoll;
+        List<byte> data = new List<byte>();
+        data.AddRange(BitConverter.GetBytes(PlayerConnectionID));
+        data.AddRange(Serializer.GetBytes(RagdollPosition));
+        networkPacket.SetPacketData(data.ToArray(), 0, data.Count);
+        SendPacketToAllPlayers(networkPacket, QosType.Reliable);
+    }
+
+    public static void SendPlayerJump(int PlayerConnectionID, Vector3 JumpDirection)
+    {
+        NetworkPacket networkPacket = ScriptableObject.CreateInstance<NetworkPacket>();
+        networkPacket.PacketHeader = NetworkPacketHeader.PlayerJump;
+        List<byte> data = new List<byte>();
+        data.AddRange(BitConverter.GetBytes(PlayerConnectionID));
+        data.AddRange(Serializer.GetBytes(JumpDirection));
+        networkPacket.SetPacketData(data.ToArray(), 0, data.Count);
+        SendPacketToAllPlayers(networkPacket, QosType.Reliable);
+    }
 }

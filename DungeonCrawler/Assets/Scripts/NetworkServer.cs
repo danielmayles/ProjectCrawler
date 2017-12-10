@@ -13,7 +13,11 @@ public enum NetworkPacketHeader
     StartGame,
     SpawnPlayer,
     SpawnRoom,
-    PlayerPosition
+    PlayerPosition,
+    PlayerTransform,
+    RagdollPlayer,
+    StopPlayerRagdoll,
+    PlayerJump
 }
 
 public enum PacketTargets

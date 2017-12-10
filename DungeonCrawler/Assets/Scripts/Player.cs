@@ -5,6 +5,8 @@ using UnityEngine;
 public class Player : Character
 {
     public Room CurrentRoom;
+    public Rigidbody PlayerRigidBody;
+
     public Rigidbody HeadRigidBody;
     protected Quaternion InitalHeadBoneRotation;
     protected Vector3 InitalHeadBonePosition;
@@ -117,7 +119,21 @@ public class Player : Character
         transform.position = Position;
     }
 
-    public void Ragdoll()
+    public void SetTransform(Vector3 Position, Vector3 Rotation)
+    {
+        transform.position = Position;
+        transform.eulerAngles = Rotation;
+    }
+
+    public virtual void Jump(Vector3 Direction)
+    {
+        Ragdoll();
+        SpineRigidBody.AddForce(Direction * 200, ForceMode.Impulse);
+        LeftLegRigidBody.AddForce(Vector3.up * 100, ForceMode.Impulse);
+        RightLegRigidBody.AddForce(Vector3.up * 100, ForceMode.Impulse);
+    }
+
+    public virtual void Ragdoll()
     {
         isRagdolling = true;
         HipRigidBody.isKinematic = false;
@@ -128,15 +144,14 @@ public class Player : Character
         CurrentHeadUprightForce = 0;
     }
 
-    public void StopRagdoll()
+    public virtual void StopRagdoll(Vector3 RagdollPosition)
     {
         //Resets root to make Sure Root Doesn't drift from the ragdoll
-        Vector3 currentRagdollPos = HipRigidBody.transform.position;
-        transform.position = currentRagdollPos;        
-        HipRigidBody.transform.position -= HipRigidBody.transform.position - currentRagdollPos;
+        transform.position = RagdollPosition;        
+        HipRigidBody.transform.position -= HipRigidBody.transform.position - RagdollPosition;
         
         StartCoroutine(GetPlayerUp());
-    }
+    }  
 
     public IEnumerator GetPlayerUp()
     {
