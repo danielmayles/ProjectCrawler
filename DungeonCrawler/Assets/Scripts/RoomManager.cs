@@ -23,6 +23,7 @@ public class RoomManager : MonoBehaviour
     {
         int RoomPrefabIndex = Random.Range(0, RoomPrefabs.Length);
         Room newRoom = SpawnRoom(Rooms.Count, RoomPrefabIndex, CurrentRoomSpawnPoint);
+        //CurrentRoomSpawnPoint.x += newRoom.GetRoomSize().x;
         if (ReplicateOverNetwork)
         {
             NetworkPacketSender.SendSpawnRoom(newRoom.GetRoomIndex(), RoomPrefabIndex, CurrentRoomSpawnPoint);

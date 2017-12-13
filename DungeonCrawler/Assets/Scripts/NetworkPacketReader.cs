@@ -77,8 +77,16 @@ public class NetworkPacketReader : MonoBehaviour
                 {
                     int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
                     Vector3 position = Serializer.DeserializeToVector3(Packet.GetPacketData(), 4);
-                    Vector3 rotation = Serializer.DeserializeToVector3(Packet.GetPacketData(), 8);
+                    Vector3 rotation = Serializer.DeserializeToVector3(Packet.GetPacketData(), 16);
                     PlayerManager.Instance.GetPlayer(PlayerID).SetTransform(position, rotation);
+                }
+                break;
+
+            case NetworkPacketHeader.PlayerModelRotation:
+                {
+                    int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
+                    Vector3 rotation = Serializer.DeserializeToVector3(Packet.GetPacketData(), 4);
+                    PlayerManager.Instance.GetPlayer(PlayerID).SetPlayerModelRotation(rotation);
                 }
                 break;
 

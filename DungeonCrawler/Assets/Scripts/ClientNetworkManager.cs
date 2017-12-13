@@ -19,7 +19,7 @@ public class ClientNetworkManager : MonoBehaviour
     public int UnreliableChannelId;
     int socketId;
 
-    private int ServerConnectionID;
+    private int ServerConnectionID = -1;
     private bool NetworkActive = false;
     
     private void Awake()
@@ -70,8 +70,11 @@ public class ClientNetworkManager : MonoBehaviour
 
     public void SendPacketToServer(NetworkPacket packet, QosType ChannelType)
     {
-        byte error;
-        NetworkTransport.Send(socketId, ServerConnectionID, GetChannel(ChannelType), packet.GetBytes(), packet.GetTotalPacketSize(), out error);
+        if (ServerConnectionID != -1)
+        {
+            byte error;
+            NetworkTransport.Send(socketId, ServerConnectionID, GetChannel(ChannelType), packet.GetBytes(), packet.GetTotalPacketSize(), out error);
+        }
     }
 
     public void StartNetworking()

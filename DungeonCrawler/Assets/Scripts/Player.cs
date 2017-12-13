@@ -55,7 +55,10 @@ public class Player : Character
     public float CurrentHeadUprightForce;
     private int ConnectionID;
     protected bool isRagdolling;
-   
+
+    protected Vector3 OldPos;
+    protected Vector3 OldRot;
+    
     protected void Start()
     {
         CurrentHeadUprightForce = MaxHeadUprightForce;
@@ -122,7 +125,13 @@ public class Player : Character
     public void SetTransform(Vector3 Position, Vector3 Rotation)
     {
         transform.position = Position;
+        Debug.Log("SERVER EULER Angles" + Rotation);
         transform.eulerAngles = Rotation;
+    }
+
+    public void SetPlayerModelRotation(Vector3 Rotation)
+    {
+        CharacterModel.transform.eulerAngles = Rotation;
     }
 
     public virtual void Jump(Vector3 Direction)
@@ -196,6 +205,20 @@ public class Player : Character
         LeftUpLegRigidBody.isKinematic = true;
         RightLegRigidBody.isKinematic = true;
         RightUpLegRigidBody.isKinematic = true;
+    }
+
+    void Update()
+    {
+        isAlive = true;
+        if (isAlive)
+        {
+            UpdateMovement();
+        }
+    }
+
+    public virtual void UpdateMovement()
+    {
+   
     }
 
     public IEnumerator UpdatePlayerPhysics()

@@ -17,7 +17,7 @@ public class PlayerManager : MonoBehaviour
             Instance = this;
         }
     }
-    
+
     public void SpawnPlayer(int ConnectionID, int RoomIndex)
     {
         Player player = Instantiate(PlayerPrefab, RoomManager.Instance.GetRoom(RoomIndex).transform.position, PlayerPrefab.transform.rotation, transform).GetComponent<Player>();

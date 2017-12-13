@@ -94,6 +94,17 @@ public class NetworkPacketSender : MonoBehaviour
         SendPacketToAllPlayers(networkPacket, QosType.Unreliable);
     }
 
+    public static void SendPlayerModelRotation(int PlayerConnectionID, Vector3 PlayerModelRotation)
+    {
+        NetworkPacket networkPacket = ScriptableObject.CreateInstance<NetworkPacket>();
+        networkPacket.PacketHeader = NetworkPacketHeader.PlayerModelRotation;
+        List<byte> data = new List<byte>();
+        data.AddRange(BitConverter.GetBytes(PlayerConnectionID));
+        data.AddRange(Serializer.GetBytes(PlayerModelRotation));
+        networkPacket.SetPacketData(data.ToArray(), 0, data.Count);
+        SendPacketToAllPlayers(networkPacket, QosType.Unreliable);
+    }
+
     public static void SendRagdollPlayer(int PlayerConnectionID)
     {
         NetworkPacket networkPacket = ScriptableObject.CreateInstance<NetworkPacket>();
