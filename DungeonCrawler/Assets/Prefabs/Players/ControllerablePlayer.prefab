@@ -1002,7 +1002,7 @@ GameObject:
   - component: {fileID: 65862110713317402}
   m_Layer: 8
   m_Name: ControllerablePlayer
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2242,7 +2242,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CharacterModel: {fileID: 1218694190255428}
-  Speed: 6
+  Speed: 3
   JumpForce: 8
   CurrentRoom: {fileID: 0}
   PlayerRigidBody: {fileID: 54003852741352638}

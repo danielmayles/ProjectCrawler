@@ -7,8 +7,9 @@ public class PlayerManager : MonoBehaviour
     public static PlayerManager Instance;
     public GameObject PlayerPrefab;
     public GameObject ControllerablePlayerPrefab;
+    public GameObject ServerPlayerPrefab;
 
-    private List<Player> Players = new List<Player>();
+    private Dictionary<int, Player> Players = new Dictionary<int, Player>();
     
     private void Awake()
     {
@@ -20,36 +21,37 @@ public class PlayerManager : MonoBehaviour
 
     public void SpawnPlayer(int ConnectionID, int RoomIndex)
     {
-        Player player = Instantiate(PlayerPrefab, RoomManager.Instance.GetRoom(RoomIndex).transform.position, PlayerPrefab.transform.rotation, transform).GetComponent<Player>();
+        Player player = Instantiate(PlayerPrefab, LevelManager.Instance.GetRoom(RoomIndex).transform.position, PlayerPrefab.transform.rotation, transform).GetComponent<Player>();
         player.InitPlayer(ConnectionID);
         player.SetAlive();
-        Players.Add(player);
+        Players.Add(ConnectionID, player);
     }
 
     public void SpawnControllerablePlayer(int ConnectionID, int RoomIndex)
     {
-        Player player = Instantiate(ControllerablePlayerPrefab, RoomManager.Instance.GetRoom(RoomIndex).transform.position, ControllerablePlayerPrefab.transform.rotation, transform).GetComponent<Player>();
+        Player player = Instantiate(ControllerablePlayerPrefab, LevelManager.Instance.GetRoom(RoomIndex).transform.position, ControllerablePlayerPrefab.transform.rotation, transform).GetComponent<Player>();
         player.InitPlayer(ConnectionID);
         player.SetAlive();
-        Players.Add(player);
+        Players.Add(ConnectionID, player);
     }
 
-    public void ServerSpawnPlayer(int ConnectionID, int RoomIndex)
+    public void SpawnServerPlayer(int ConnectionID, int RoomIndex)
     {
-        SpawnPlayer(ConnectionID, RoomIndex);
+        Player player = Instantiate(ServerPlayerPrefab, LevelManager.Instance.GetRoom(RoomIndex).transform.position, ServerPlayerPrefab.transform.rotation, transform).GetComponent<Player>();
+        player.InitPlayer(ConnectionID);
+        player.SetAlive();
+        Players.Add(ConnectionID, player);
+    }
+
+    public void SendSpawnPlayer(int ConnectionID, int RoomIndex)
+    {
+        SpawnServerPlayer(ConnectionID, RoomIndex);
         NetworkPacketSender.SendSpawnPlayer(ConnectionID, RoomIndex);
     }
 
     public Player GetPlayer(int ConnectionID)
     {
-        for(int i = 0; i < Players.Count; i++)
-        {
-            if(Players[i].GetPlayerConnectionID() == ConnectionID)
-            {
-                return Players[i];
-            }
-        }
-        return null;
+        return Players[ConnectionID];
     }
 
     public int GetAmountOfPlayers()

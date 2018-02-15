@@ -24,7 +24,7 @@ public class NetworkPacketReader : MonoBehaviour
                     ConnectionIDPacket.SetPacketTarget(SenderConnectionID);
                     ConnectionIDPacket.PacketHeader = NetworkPacketHeader.ConnectionID;
                     ConnectionIDPacket.SetPacketData(BitConverter.GetBytes(SenderConnectionID), 0, sizeof(int));
-                    NetworkServer.Instance.SendPacketToClient(ConnectionIDPacket, QosType.Reliable);
+                    NetworkManager.Instance.SendPacketToClient(ConnectionIDPacket, QosType.Reliable);
                 }
                 break;
 
@@ -40,20 +40,11 @@ public class NetworkPacketReader : MonoBehaviour
 
                 break;
 
-            case NetworkPacketHeader.SpawnRoom:
-                {
-                    byte[] data = Packet.GetPacketData();
-                    int RoomIndex = BitConverter.ToInt32(data, 0);
-                    int RoomPrefabIndex = BitConverter.ToInt32(data, 4);
-                    Vector3 RoomPosition = Serializer.DeserializeToVector3(data, 8);
-                    RoomManager.Instance.SetNewRoom(RoomIndex, RoomPrefabIndex, RoomPosition);
-                }
-                break;
-
             case NetworkPacketHeader.SpawnPlayer:
                 {
                     int PlayerConnectionID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
                     int SpawnRoomIndex = BitConverter.ToInt32(Packet.GetPacketData(), 4);
+
                     if (PlayerConnectionID == NetworkDetails.GetLocalConnectionID())
                     {
                         PlayerManager.Instance.SpawnControllerablePlayer(PlayerConnectionID, SpawnRoomIndex);
@@ -68,8 +59,9 @@ public class NetworkPacketReader : MonoBehaviour
             case NetworkPacketHeader.PlayerPosition:
                 {
                     int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
-                    Vector3 position = Serializer.DeserializeToVector3(Packet.GetPacketData(), 4);
-                    PlayerManager.Instance.GetPlayer(PlayerID).SetPosition(position);
+                    int InputID = BitConverter.ToInt32(Packet.GetPacketData(), 4);
+                    Vector3 position = Serializer.DeserializeToVector3(Packet.GetPacketData(), 8);
+                    PlayerManager.Instance.GetPlayer(PlayerID).SetPosition(position, InputID);
                 }
                 break;
 
@@ -82,14 +74,6 @@ public class NetworkPacketReader : MonoBehaviour
                 }
                 break;
 
-            case NetworkPacketHeader.PlayerModelRotation:
-                {
-                    int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
-                    Vector3 rotation = Serializer.DeserializeToVector3(Packet.GetPacketData(), 4);
-                    PlayerManager.Instance.GetPlayer(PlayerID).SetPlayerModelRotation(rotation);
-                }
-                break;
-
             case NetworkPacketHeader.RagdollPlayer:
                 {
                     int PlayerToRagdollID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
@@ -97,19 +81,53 @@ public class NetworkPacketReader : MonoBehaviour
                 }
                 break;
 
-            case NetworkPacketHeader.StopPlayerRagdoll:
+            case NetworkPacketHeader.PlayerInputUpdate:
                 {
-                    int PlayerToStopRagdollID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
-                    Vector3 RagdollStopPosition = Serializer.DeserializeToVector3(Packet.GetPacketData(), 4);
-                    PlayerManager.Instance.GetPlayer(PlayerToStopRagdollID).StopRagdoll(RagdollStopPosition);
+                    int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
+                    float DeltaTime = BitConverter.ToSingle(Packet.GetPacketData(), 4);
+                    int InputID = BitConverter.ToInt32(Packet.GetPacketData(), 8);
+                    int AmountOfInputs = BitConverter.ToInt32(Packet.GetPacketData(), 12);
+                    InputType[] PlayerInputs = new InputType[AmountOfInputs];
+                    for(int i = 0; i < AmountOfInputs; i++)
+                    {
+                        PlayerInputs[i] = (InputType)BitConverter.ToInt32(Packet.GetPacketData(), 16 + (4 * i));
+                    }
+
+                    PlayerManager.Instance.GetPlayer(PlayerID).UpdatePlayer(PlayerInputs, InputID, DeltaTime);
                 }
                 break;
 
-            case NetworkPacketHeader.PlayerJump:
+            case NetworkPacketHeader.PlayerChangeRoom:
                 {
                     int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
-                    Vector3 JumpDirection = Serializer.DeserializeToVector3(Packet.GetPacketData(), 4);
-                    PlayerManager.Instance.GetPlayer(PlayerID).Jump(JumpDirection);
+                    int RoomIndex = BitConverter.ToInt32(Packet.GetPacketData(), 4);
+                    PlayerManager.Instance.GetPlayer(PlayerID).CurrentRoom.PlayerLeaveRoom(PlayerID);
+                    LevelManager.Instance.GetRoom(RoomIndex).PlayerJoinRoom(PlayerID);
+                }
+                break;
+
+            case NetworkPacketHeader.RequestLevel:
+                {
+                    NetworkPacketSender.SendLevelData(SenderConnectionID);
+                }
+                break;
+
+            case NetworkPacketHeader.LevelData:
+                {
+                    LevelManager.Instance.ReadInLevelBytes(Packet.GetPacketData());
+                }
+                break;
+
+            case NetworkPacketHeader.RequestRoomData:
+                {
+                    int RoomIndex = BitConverter.ToInt32(Packet.GetPacketData(), 0);
+                    NetworkPacketSender.SendRoomData(SenderConnectionID, RoomIndex);
+                }
+                break;
+
+            case NetworkPacketHeader.RoomData:
+                {
+                    LevelManager.Instance.ReadInRoomAsBytes(Packet.GetPacketData());
                 }
                 break;
         }

@@ -954,7 +954,7 @@ GameObject:
   - component: {fileID: 65170796781757750}
   m_Layer: 8
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2242,7 +2242,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CharacterModel: {fileID: 1571634089255656}
-  Speed: 6
+  Speed: 3
   JumpForce: 8
   CurrentRoom: {fileID: 0}
   PlayerRigidBody: {fileID: 54984208749729326}

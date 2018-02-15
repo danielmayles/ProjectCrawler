@@ -2,49 +2,47 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum InputType
+{
+    Left,
+    Right,
+    Jump
+}
+
 public class ControllerablePlayer : Player
 {
-    public override void UpdateMovement()
-    {
-        Vector3 MovementAmount = new Vector3();
-        if (!isRagdolling)
+    List<InputType> InputsToSendToServer = new List<InputType>();
+    private int CurrentInputID;
+
+    void FixedUpdate()
+    { 
+        bool InputKeyPressed = false;
+        if (Input.GetKey(KeyCode.A))
         {
-            if (Input.GetKey(KeyCode.A))
-            {
-                MovementAmount.x -= Speed * Time.deltaTime;
-            }
-            if (Input.GetKey(KeyCode.D))
-            {
-                MovementAmount.x += Speed * Time.deltaTime;
-            }
+            InputKeyPressed = true;
+            InputsToSendToServer.Add(InputType.Left);
+            CurrentVelocity -= Speed * Vector3.right;
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            InputKeyPressed = true;
+            InputsToSendToServer.Add(InputType.Right);
+            CurrentVelocity += Speed * Vector3.right;
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (isRagdolling)
-            {
-                StopRagdoll(HipRigidBody.transform.position);
-            }
-            else
-            {
-                Jump(MovementAmount.normalized);
-            }
+            InputKeyPressed = true;
+            InputsToSendToServer.Add(InputType.Jump);
+            CurrentVelocity += JumpForce * Vector3.up;
         }
 
-        transform.position += MovementAmount;
-        transform.forward = MovementAmount.normalized;
-        if (transform.position != OldPos || transform.eulerAngles != OldRot)
+        if (InputKeyPressed)
         {
-            Debug.Log("Client EULER Angles" + transform.eulerAngles);
-            NetworkPacketSender.SendPlayerTransform(GetPlayerConnectionID(), transform);
-            OldPos = transform.position;
-            OldRot = transform.eulerAngles;
+            CurrentInputID++;
+            transform.position += CurrentVelocity * Time.deltaTime;
+            CurrentVelocity = Vector3.zero;
+            NetworkPacketSender.SendPlayerInput(GetPlayerConnectionID(), InputsToSendToServer, CurrentInputID, Time.deltaTime);         
         }
-    }
-
-    public override void Jump(Vector3 Direction)
-    {
-        base.Jump(Direction);
-        NetworkPacketSender.SendPlayerJump(GetPlayerConnectionID(), Direction);
     }
 
     public override void Ragdoll()
@@ -53,9 +51,11 @@ public class ControllerablePlayer : Player
         NetworkPacketSender.SendRagdollPlayer(GetPlayerConnectionID());
     }
 
-    public override void StopRagdoll(Vector3 RagdollPosition)
+    public override void SetPosition(Vector3 Position, int InputID)
     {
-        base.StopRagdoll(RagdollPosition);
-        NetworkPacketSender.SendStopRagdollPlayer(GetPlayerConnectionID(), RagdollPosition);
+        if(CurrentInputID == InputID && transform.position != Position)
+        {
+            transform.position = Position;
+        }
     }
 }

@@ -4,15 +4,14 @@ using UnityEngine;
 
 public class Room : MonoBehaviour
 {
+    public float RoomWidth;
+    public float RoomHeight;
+
     private List<Player> PlayersInRoom = new List<Player>();
     private List<Room> NearbyRooms = new List<Room>();
     private Bounds RoomBounds;
     private int RoomIndex;
-
-    private void Awake()
-    {
-        CalculateBounds();
-    }
+    private int RoomPrefabIndex;
 
     public void SetRoomIndex(int newIndex)
     {
@@ -24,36 +23,46 @@ public class Room : MonoBehaviour
         return RoomIndex;
     }
 
-    public void CalculateBounds()
+    public void SetRoomPrefabIndex(int PrefabIndex)
     {
-        Renderer[] Renderers = GetComponentsInChildren<Renderer>();
-        for(int i = 0; i < Renderers.Length; i++)
-        {
-            RoomBounds.Encapsulate(Renderers[i].bounds);
-        }
+        RoomPrefabIndex = PrefabIndex;
     }
 
-    public Player[] GetPlayersAndNearbyPlayers()
+    public int GetRoomPrefabIndex()
     {
-        List<Player> NearByPlayers = new List<Player>();
-        NearByPlayers.AddRange(PlayersInRoom);
-        for(int i = 0; i < NearbyRooms.Count; i++)
-        {
-            NearByPlayers.AddRange(NearbyRooms[i].GetPlayersInRoom());
-        }
-
-        return NearByPlayers.ToArray();
+        return RoomPrefabIndex;
     }
 
     public Player[] GetPlayersInRoom()
     {
-        List<Player> Players = new List<Player>();
-        Players.AddRange(PlayersInRoom);
-        return Players.ToArray();
+        return PlayersInRoom.ToArray();
     }
 
     public Vector2 GetRoomSize()
     {
-        return RoomBounds.size;
+        return new Vector2(RoomWidth, RoomHeight);
+    }
+
+    public void PlayerJoinRoom(int PlayerConnectionID)
+    {
+        PlayerLeaveRoom(PlayerConnectionID);
+        PlayerJoinRoom(PlayerManager.Instance.GetPlayer(PlayerConnectionID));
+    }
+
+    public void PlayerLeaveRoom(int PlayerConnectionID)
+    {
+        PlayerLeaveRoom(PlayerManager.Instance.GetPlayer(PlayerConnectionID));
+    }
+
+    public void PlayerJoinRoom(Player player)
+    {
+        player.CurrentRoom.PlayerLeaveRoom(player);
+        player.CurrentRoom = this;
+        PlayersInRoom.Add(player);
+    }
+
+    public void PlayerLeaveRoom(Player player)
+    {
+        PlayersInRoom.Remove(player);
     }
 }

@@ -51,6 +51,8 @@ public class Player : Character
     protected Quaternion InitalRightUpLegBoneRotation;
     protected Vector3 InitalRightUpLegBonePosition;
 
+    protected Vector3 CurrentVelocity;
+
     public float MaxHeadUprightForce;
     public float CurrentHeadUprightForce;
     private int ConnectionID;
@@ -64,7 +66,6 @@ public class Player : Character
         CurrentHeadUprightForce = MaxHeadUprightForce;
         StoreInitalRotations();
         StoreInitalPositions();
-        StartCoroutine(UpdatePlayerPhysics());
     }
 
     public void InitPlayer(int ConnectionID)
@@ -117,7 +118,7 @@ public class Player : Character
         return ConnectionID;
     }
 
-    public void SetPosition(Vector3 Position)
+    public virtual void SetPosition(Vector3 Position, int InputID)
     {
         transform.position = Position;
     }
@@ -127,19 +128,6 @@ public class Player : Character
         transform.position = Position;
         Debug.Log("SERVER EULER Angles" + Rotation);
         transform.eulerAngles = Rotation;
-    }
-
-    public void SetPlayerModelRotation(Vector3 Rotation)
-    {
-        CharacterModel.transform.eulerAngles = Rotation;
-    }
-
-    public virtual void Jump(Vector3 Direction)
-    {
-        Ragdoll();
-        SpineRigidBody.AddForce(Direction * 200, ForceMode.Impulse);
-        LeftLegRigidBody.AddForce(Vector3.up * 100, ForceMode.Impulse);
-        RightLegRigidBody.AddForce(Vector3.up * 100, ForceMode.Impulse);
     }
 
     public virtual void Ragdoll()
@@ -153,81 +141,8 @@ public class Player : Character
         CurrentHeadUprightForce = 0;
     }
 
-    public virtual void StopRagdoll(Vector3 RagdollPosition)
+    public virtual void UpdatePlayer(InputType[] PlayerInputs, int InputID, float DeltaTime)
     {
-        //Resets root to make Sure Root Doesn't drift from the ragdoll
-        transform.position = RagdollPosition;        
-        HipRigidBody.transform.position -= HipRigidBody.transform.position - RagdollPosition;
-        
-        StartCoroutine(GetPlayerUp());
-    }  
 
-    public IEnumerator GetPlayerUp()
-    {
-        Quaternion CurrentHipBoneRotation = HipRigidBody.transform.localRotation;
-        Quaternion CurrentLeftLegBoneRotation = LeftLegRigidBody.transform.localRotation;
-        Quaternion CurrentLeftUpLegBoneRotation = LeftUpLegRigidBody.transform.localRotation;
-        Quaternion CurrentRightLegBoneRotation = RightLegRigidBody.transform.localRotation;
-        Quaternion CurrentRightUpLegBoneRotation = RightUpLegRigidBody.transform.localRotation;
-
-        Vector3 CurrentHipBonePosition = HipRigidBody.transform.localPosition;
-        Vector3 CurrentLeftLegBonePosition = LeftLegRigidBody.transform.localPosition;
-        Vector3 CurrentLeftUpLegBonePosition = LeftUpLegRigidBody.transform.localPosition;
-        Vector3 CurrentRightLegBonePosition = RightLegRigidBody.transform.localPosition;
-        Vector3 CurrentRightUpLegBonePosition = RightUpLegRigidBody.transform.localPosition;
-
-        float Alpha = 0;
-        float TimeToGetUp = 1.0f;
-        float TimeElapsed = 0.0f;
-        while(Alpha < 1)
-        {
-            TimeElapsed += Time.deltaTime;
-            Alpha = TimeElapsed / TimeToGetUp;
-
-            HipRigidBody.transform.localPosition = Vector3.Lerp(CurrentHipBonePosition, InitalHipBonePosition, Alpha);
-            LeftLegRigidBody.transform.localPosition = Vector3.Lerp(CurrentLeftLegBonePosition, InitalLeftLegBonePosition, Alpha);
-            LeftUpLegRigidBody.transform.localPosition = Vector3.Lerp(CurrentLeftUpLegBonePosition, InitalLeftUpLegBonePosition, Alpha);
-            RightLegRigidBody.transform.localPosition = Vector3.Lerp(CurrentRightLegBonePosition, InitalRightLegBonePosition, Alpha);
-            RightUpLegRigidBody.transform.localPosition = Vector3.Lerp(CurrentRightUpLegBonePosition, InitalRightUpLegBonePosition, Alpha);
-
-            HipRigidBody.transform.localRotation = Quaternion.Lerp(CurrentHipBoneRotation, InitalHipBoneRotation, Alpha);
-            LeftLegRigidBody.transform.localRotation = Quaternion.Lerp(CurrentLeftLegBoneRotation, InitalLeftLegBoneRotation, Alpha);
-            LeftUpLegRigidBody.transform.localRotation = Quaternion.Lerp(CurrentLeftUpLegBoneRotation, InitalLeftUpLegBoneRotation, Alpha);
-            RightLegRigidBody.transform.localRotation = Quaternion.Lerp(CurrentRightLegBoneRotation, InitalRightLegBoneRotation, Alpha);
-            RightUpLegRigidBody.transform.localRotation = Quaternion.Lerp(CurrentRightUpLegBoneRotation, InitalRightUpLegBoneRotation, Alpha);
-            yield return new WaitForEndOfFrame();
-        }
-
-        CurrentHeadUprightForce = MaxHeadUprightForce;
-        isRagdolling = false;
-        HipRigidBody.isKinematic = true;
-        LeftLegRigidBody.isKinematic = true;
-        LeftUpLegRigidBody.isKinematic = true;
-        RightLegRigidBody.isKinematic = true;
-        RightUpLegRigidBody.isKinematic = true;
-    }
-
-    void Update()
-    {
-        isAlive = true;
-        if (isAlive)
-        {
-            UpdateMovement();
-        }
-    }
-
-    public virtual void UpdateMovement()
-    {
-   
-    }
-
-    public IEnumerator UpdatePlayerPhysics()
-    {
-        isAlive = true;
-        while(isAlive)
-        {
-            HeadRigidBody.AddForce(Vector3.up * CurrentHeadUprightForce, ForceMode.Force);
-            yield return new WaitForEndOfFrame();
-        }
     }
 }
