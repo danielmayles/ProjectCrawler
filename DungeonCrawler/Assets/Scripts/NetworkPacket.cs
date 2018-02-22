@@ -3,9 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NetworkPacket:ScriptableObject
+public class NetworkPacket : ScriptableObject
 {
     private int PacketTargetID;
+    private bool IsTargetRoom = false;
     public NetworkPacketHeader PacketHeader;
     private byte[] Data;
 
@@ -30,7 +31,7 @@ public class NetworkPacket:ScriptableObject
         List<byte> PacketBytes = new List<byte>();
         PacketBytes.AddRange(BitConverter.GetBytes(PacketTargetID));
         PacketBytes.AddRange(BitConverter.GetBytes((int)PacketHeader));
-
+        PacketBytes.AddRange(BitConverter.GetBytes(IsTargetRoom));
         if (Data != null && Data.Length != 0)
         {
             PacketBytes.AddRange(BitConverter.GetBytes(Data.Length));
@@ -63,6 +64,16 @@ public class NetworkPacket:ScriptableObject
     public void SetPacketTarget(int TargetID)
     {
         PacketTargetID = TargetID;
+    }
+
+    public void SetIsTargetRoom(bool isTargetRoom)
+    {
+        IsTargetRoom = isTargetRoom;
+    }
+
+    public bool GetIsTargetRoom()
+    {
+        return IsTargetRoom;
     }
 
     public int GetPacketTarget()

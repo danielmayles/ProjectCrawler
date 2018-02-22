@@ -167,3 +167,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   RoomWidth: 12
   RoomHeight: 12
+  RoomEntrances:
+  - {fileID: 1467390009389356}

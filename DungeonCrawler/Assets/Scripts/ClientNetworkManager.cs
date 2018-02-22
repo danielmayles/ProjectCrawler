@@ -146,7 +146,8 @@ public class ClientNetworkManager : MonoBehaviour
                     NetworkPacket RecPacket = ScriptableObject.CreateInstance<NetworkPacket>();
                     RecPacket.SetPacketTarget(BitConverter.ToInt32(recBuffer, 0));
                     RecPacket.PacketHeader = (NetworkPacketHeader)BitConverter.ToInt32(recBuffer, 4);
-                    RecPacket.SetPacketData(recBuffer, 12, BitConverter.ToInt32(recBuffer, 8));
+                    RecPacket.SetIsTargetRoom(BitConverter.ToBoolean(recBuffer, 8));
+                    RecPacket.SetPacketData(recBuffer, 13, BitConverter.ToInt32(recBuffer, 9));
                     NetworkPacketReader.ReadPacket(RecPacket, recConnectionId, false);
                     break;
                 case NetworkEventType.DisconnectEvent:

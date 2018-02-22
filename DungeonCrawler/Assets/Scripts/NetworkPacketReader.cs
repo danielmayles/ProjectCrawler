@@ -43,16 +43,7 @@ public class NetworkPacketReader : MonoBehaviour
             case NetworkPacketHeader.SpawnPlayer:
                 {
                     int PlayerConnectionID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
-                    int SpawnRoomIndex = BitConverter.ToInt32(Packet.GetPacketData(), 4);
-
-                    if (PlayerConnectionID == NetworkDetails.GetLocalConnectionID())
-                    {
-                        PlayerManager.Instance.SpawnControllerablePlayer(PlayerConnectionID, SpawnRoomIndex);
-                    }
-                    else
-                    {
-                        PlayerManager.Instance.SpawnPlayer(PlayerConnectionID, SpawnRoomIndex);
-                    }
+                    PlayerManager.Instance.SpawnPlayer(PlayerConnectionID);         
                 }
                 break;
 
@@ -97,11 +88,26 @@ public class NetworkPacketReader : MonoBehaviour
                 }
                 break;
 
-            case NetworkPacketHeader.PlayerChangeRoom:
+            case NetworkPacketHeader.AddPlayerToRoom:
                 {
                     int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
                     int RoomIndex = BitConverter.ToInt32(Packet.GetPacketData(), 4);
-                    PlayerManager.Instance.GetPlayer(PlayerID).CurrentRoom.PlayerLeaveRoom(PlayerID);
+                    LevelManager.Instance.GetRoom(RoomIndex).PlayerJoinRoom(PlayerID);
+                }
+                break;
+
+            case NetworkPacketHeader.RemovePlayerFromRoom:
+                {
+                    int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
+                    int RoomIndex = BitConverter.ToInt32(Packet.GetPacketData(), 4);
+                    LevelManager.Instance.GetRoom(RoomIndex).PlayerLeaveRoom(PlayerID);
+                }
+                break;
+
+            case NetworkPacketHeader.SpawnPlayerInRoom:
+                {
+                    int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
+                    int RoomIndex = BitConverter.ToInt32(Packet.GetPacketData(), 4);
                     LevelManager.Instance.GetRoom(RoomIndex).PlayerJoinRoom(PlayerID);
                 }
                 break;
@@ -128,6 +134,18 @@ public class NetworkPacketReader : MonoBehaviour
             case NetworkPacketHeader.RoomData:
                 {
                     LevelManager.Instance.ReadInRoomAsBytes(Packet.GetPacketData());
+                }
+                break;
+
+            case NetworkPacketHeader.RequestCurrentPlayers:
+                {
+                    NetworkPacketSender.SendPlayerData(SenderConnectionID);
+                }
+                break;
+
+            case NetworkPacketHeader.PlayerData:
+                {
+                    PlayerManager.Instance.ReadInPlayersAsBytes(Packet.GetPacketData());
                 }
                 break;
         }

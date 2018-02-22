@@ -18,7 +18,11 @@ public enum NetworkPacketHeader
     RagdollPlayer,
     PlayerInputUpdate,
     PlayerPositionUpdate,
-    PlayerChangeRoom,
+    AddPlayerToRoom,
+    RemovePlayerFromRoom,
+    RequestCurrentPlayers,
+    PlayerData,
+    SpawnPlayerInRoom,
     RequestLevel,
     LevelData,
     RequestRoomData,
@@ -41,7 +45,6 @@ public class NetworkManager : MonoBehaviour
     private int AmountOfActiveConnections;
     private int ReceivePacketSize = 2048;
     private int ReliableSequencedChannelId;
-    private int ReliableFragmentedSequencedChannelId;
     private int ReliableChannelId;
     private int UnreliableChannelId;
     private int socketId;
@@ -67,7 +70,6 @@ public class NetworkManager : MonoBehaviour
         ReliableSequencedChannelId = config.AddChannel(QosType.ReliableSequenced);
         ReliableChannelId = config.AddChannel(QosType.Reliable);
         UnreliableChannelId = config.AddChannel(QosType.Unreliable);
-        ReliableFragmentedSequencedChannelId = config.AddChannel(QosType.ReliableFragmentedSequenced);
         HostTopology topology = new HostTopology(config, MaxConnections);
         socketId = NetworkTransport.AddHost(topology, ServerPort);
     }
@@ -158,16 +160,30 @@ public class NetworkManager : MonoBehaviour
                 ChannelID = UnreliableChannelId;
                 break;
 
-            case QosType.ReliableFragmentedSequenced:
-                ChannelID = ReliableFragmentedSequencedChannelId;
-                break;
-
             default:
                 Debug.Log("QOS TYPE " + QOSChannel + " has not been implemented defaulting to Unreliable");
                 ChannelID = UnreliableChannelId;
                 break;
         }
         return ChannelID;
+    }
+
+    public QosType GetQOSType(int ChannelID)
+    {
+        if(ChannelID == ReliableChannelId)
+        {
+            return QosType.Reliable;
+        }
+        else if (ChannelID == ReliableSequencedChannelId)
+        {
+            return QosType.ReliableSequenced;
+        }
+        else if(ChannelID == UnreliableChannelId)
+        {
+            return QosType.Unreliable;
+        }
+        Debug.Log("ChannelID " + ChannelID + " has not been implemented defaulting to Unreliable");
+        return QosType.Unreliable;
     }
 
     IEnumerator NetworkUpdate()
@@ -193,14 +209,19 @@ public class NetworkManager : MonoBehaviour
                     NetworkPacket RecPacket = ScriptableObject.CreateInstance<NetworkPacket>();
                     RecPacket.SetPacketTarget(BitConverter.ToInt32(recBuffer, 0));                    
                     RecPacket.PacketHeader = (NetworkPacketHeader)BitConverter.ToInt32(recBuffer, 4);
-                    RecPacket.SetPacketData(recBuffer, 12, BitConverter.ToInt32(recBuffer, 8));
+                    RecPacket.SetIsTargetRoom(BitConverter.ToBoolean(recBuffer, 8));
+                    RecPacket.SetPacketData(recBuffer, 13, BitConverter.ToInt32(recBuffer, 9));
                     NetworkPacketReader.ReadPacket(RecPacket, recConnectionId, true);
               
-                    if (RecPacket.GetPacketTarget()!= (int)PacketTargets.ServerOnly)
+                    if (RecPacket.GetPacketTarget() != (int)PacketTargets.ServerOnly)
                     {
                         if (RecPacket.GetPacketTarget() == (int)PacketTargets.RelayToAllClients)
                         {
                             RelayPacketToAllClients(RecPacket, recConnectionId, recChannelId);
+                        }
+                        else if (RecPacket.GetIsTargetRoom())
+                        {
+                            NetworkPacketSender.RelayPacketToPlayersInRoom(RecPacket, LevelManager.Instance.GetRoom(RecPacket.GetPacketTarget()), GetQOSType(recChannelId), false);
                         }
                         else
                         {

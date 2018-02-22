@@ -71,6 +71,7 @@ public class Player : Character
     public void InitPlayer(int ConnectionID)
     {
         this.ConnectionID = ConnectionID;
+        gameObject.SetActive(false);
     }
 
     private void StoreInitalRotations()
@@ -101,6 +102,11 @@ public class Player : Character
         InitalRightForearmBonePosition = RightForearmRigidBody.transform.localPosition;
         InitalRightLegBonePosition = RightLegRigidBody.transform.localPosition;
         InitalRightUpLegBonePosition = RightUpLegRigidBody.transform.localPosition;
+    }
+
+    public void IsInRoom()
+    {
+        gameObject.SetActive(true);
     }
 
     public void SetAlive()

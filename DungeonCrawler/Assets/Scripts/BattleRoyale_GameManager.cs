@@ -17,7 +17,8 @@ public class BattleRoyale_GameManager : MonoBehaviour
     public void PlayerReady(int ConnectionID)
     {
         NetworkPacketSender.SendLevelData(ConnectionID);
-        //NetworkPacketSender.SendRoomData(ConnectionID, 0);
-        //PlayerManager.Instance.SendSpawnPlayer(ConnectionID, 0);
+        NetworkPacketSender.SendPlayerData(ConnectionID);
+        NetworkPacketSender.SendSpawnPlayer(ConnectionID);
+        NetworkPacketSender.AddPlayerToRoom(ConnectionID, 0);
     }
 }

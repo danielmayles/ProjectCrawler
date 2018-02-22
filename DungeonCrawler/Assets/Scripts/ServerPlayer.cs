@@ -6,7 +6,6 @@ public class ServerPlayer : Player
 {
     public override void UpdatePlayer(InputType[] PlayerInputs, int InputID, float DeltaTime)
     {
-        Debug.Log("Update Server Player");
         for (int i = 0; i < PlayerInputs.Length; i++)
         {
             switch (PlayerInputs[i])
@@ -37,7 +36,7 @@ public class ServerPlayer : Player
             if (CurrentRoom != newRoom)
             {
                 newRoom.PlayerJoinRoom(GetPlayerConnectionID());
-                NetworkPacketSender.SendPlayerChangeRoom(GetPlayerConnectionID(), newRoom);
+                NetworkPacketSender.AddPlayerToRoom(GetPlayerConnectionID(), newRoom);
             }
         }
     }

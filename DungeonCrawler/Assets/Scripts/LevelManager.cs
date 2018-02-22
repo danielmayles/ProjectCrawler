@@ -61,13 +61,19 @@ public class LevelManager : MonoBehaviour
 
     public void ReadInLevelBytes(byte[] LevelBytes)
     {
+        int CurrentByteIndex = 0;
         int RoomCount = BitConverter.ToInt32(LevelBytes, 0);
+        CurrentByteIndex += 4;
         Rooms.Clear();
+        
         for(int i = 0; i < RoomCount; i++)
         {
-            int RoomIndex = BitConverter.ToInt32(LevelBytes, 4 + (4 * i));
-            int RoomPrefabIndex= BitConverter.ToInt32(LevelBytes, 8 + (4 * i));
-            Vector3 RoomPosition = Serializer.DeserializeToVector3(LevelBytes, 12 + (12 * i));
+            int RoomIndex = BitConverter.ToInt32(LevelBytes, CurrentByteIndex);
+            CurrentByteIndex += 4;
+            int RoomPrefabIndex= BitConverter.ToInt32(LevelBytes, CurrentByteIndex);
+            CurrentByteIndex += 4;
+            Vector3 RoomPosition = Serializer.DeserializeToVector3(LevelBytes, CurrentByteIndex);
+            CurrentByteIndex += 12;
             SpawnRoom(RoomIndex, RoomPrefabIndex, RoomPosition);
         }
     }
@@ -95,7 +101,7 @@ public class LevelManager : MonoBehaviour
         for (int i = 0; i < PlayerCount; i++)
         { 
             int PlayerConnectionID = BitConverter.ToInt32(RoomBytes, 8 + (4 * i));
-            CurrentRoom.PlayerJoinRoom(PlayerManager.Instance.GetPlayer(PlayerConnectionID));
+            CurrentRoom.PlayerJoinRoom(PlayerConnectionID);
         }
     }
 }
