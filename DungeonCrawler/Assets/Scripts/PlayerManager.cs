@@ -101,7 +101,7 @@ public class PlayerManager : MonoBehaviour
 
             int PlayerRoomIndex = BitConverter.ToInt32(Bytes, CurrentByteIndex);
             CurrentByteIndex += 4;
-            LevelManager.Instance.GetRoom(CurrentByteIndex).PlayerJoinRoom(PlayerConnectionIndex);
+            LevelManager.Instance.GetRoom(0).PlayerJoinRoom(PlayerConnectionIndex);
         }
     }
 

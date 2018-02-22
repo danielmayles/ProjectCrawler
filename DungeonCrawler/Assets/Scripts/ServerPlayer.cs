@@ -30,6 +30,7 @@ public class ServerPlayer : Player
 
     public void OnTriggerEnter(Collider other)
     {
+        /*
         if(other.tag == "Room")
         {
             Room newRoom = other.GetComponent<Room>();
@@ -39,5 +40,6 @@ public class ServerPlayer : Player
                 NetworkPacketSender.AddPlayerToRoom(GetPlayerConnectionID(), newRoom);
             }
         }
+        */
     }
 }

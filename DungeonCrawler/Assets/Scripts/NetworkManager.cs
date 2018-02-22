@@ -41,7 +41,7 @@ public class NetworkManager : MonoBehaviour
     public int ServerPort = 8080;
     public int MaxConnections = 100;
 
-    private List<Connection> Connections = new List<Connection>();
+    private Dictionary<int, Connection> Connections = new Dictionary<int, Connection>();
     private int AmountOfActiveConnections;
     private int ReceivePacketSize = 2048;
     private int ReliableSequencedChannelId;
@@ -74,40 +74,21 @@ public class NetworkManager : MonoBehaviour
         socketId = NetworkTransport.AddHost(topology, ServerPort);
     }
 
-    int AddConnection(int ConnectionID)
+    void AddConnection(int ConnectionID)
     {
-        AmountOfActiveConnections++;
         Connection NewConnection = ScriptableObject.CreateInstance<Connection>();
-        NewConnection.ConnectionID = ConnectionID;
-        for (int i = 0; i < Connections.Count; i++)
-        {
-            if (Connections[i].isActive == false)
-            {
-                Connections[i] = NewConnection;
-                return i;
-            }
-        }
-
-        int ConnectionIndex = Connections.Count;
-        Connections.Add(NewConnection);
-        return ConnectionIndex;
+        NewConnection.ConnectionID = ConnectionID;    
+        Connections.Add(ConnectionID, NewConnection);
     }
 
     void RemoveConnection(int ConnectionID)
     {
-        AmountOfActiveConnections--;
-        for (int i = 0; i < Connections.Count; i++)
-        {
-            if (Connections[i].ConnectionID == ConnectionID)
-            {
-                Connections[i].isActive = false;
-            }
-        }
+        Connections.Remove(ConnectionID);
     }
 
     public int GetAmountOfConnections()
     {
-        return AmountOfActiveConnections;
+        return Connections.Count;
     }
 
     public void SendPacketToClient(NetworkPacket packet, int QosChannelID)
@@ -124,11 +105,11 @@ public class NetworkManager : MonoBehaviour
 
     public void RelayPacketToAllClients(NetworkPacket Packet, int SenderConnectionID, int QosChannelID)
     {
-        for(int i = 0; i < Connections.Count; i++)
+        foreach (KeyValuePair<int, Connection> connection in Connections)
         {
-            if (Connections[i].ConnectionID != SenderConnectionID)
+            if (connection.Key != SenderConnectionID)
             {
-                Packet.SetPacketTarget(Connections[i].ConnectionID);
+                Packet.SetPacketTarget(connection.Key);
                 SendPacketToClient(Packet, QosChannelID);
             }
         }
@@ -136,10 +117,10 @@ public class NetworkManager : MonoBehaviour
 
     public void SendPacketToAllClients(NetworkPacket Packet, int QosChannelID)
     {
-        for (int i = 0; i < Connections.Count; i++)
-        {     
-            Packet.SetPacketTarget(Connections[i].ConnectionID);
-            SendPacketToClient(Packet, QosChannelID);  
+        foreach (KeyValuePair<int, Connection> connection in Connections)
+        {
+            Packet.SetPacketTarget(connection.Key);
+            SendPacketToClient(Packet, QosChannelID);    
         }
     }
 
