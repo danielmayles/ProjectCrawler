@@ -42,6 +42,7 @@ public class NetworkManager : MonoBehaviour
     public int MaxConnections = 100;
 
     private Dictionary<int, Connection> Connections = new Dictionary<int, Connection>();
+    private List<int> CurrentConnectedClientConnectionIDs = new List<int>();
     private int AmountOfActiveConnections;
     private int ReceivePacketSize = 2048;
     private int ReliableSequencedChannelId;
@@ -79,11 +80,13 @@ public class NetworkManager : MonoBehaviour
         Connection NewConnection = ScriptableObject.CreateInstance<Connection>();
         NewConnection.ConnectionID = ConnectionID;    
         Connections.Add(ConnectionID, NewConnection);
+        CurrentConnectedClientConnectionIDs.Add(ConnectionID);
     }
 
     void RemoveConnection(int ConnectionID)
     {
         Connections.Remove(ConnectionID);
+        CurrentConnectedClientConnectionIDs.Remove(ConnectionID);
     }
 
     public int GetAmountOfConnections()
@@ -105,11 +108,11 @@ public class NetworkManager : MonoBehaviour
 
     public void RelayPacketToAllClients(NetworkPacket Packet, int SenderConnectionID, int QosChannelID)
     {
-        foreach (KeyValuePair<int, Connection> connection in Connections)
-        {
-            if (connection.Key != SenderConnectionID)
+        for(int i = 0; i < CurrentConnectedClientConnectionIDs.Count; i++)
+        { 
+            if (CurrentConnectedClientConnectionIDs[i] != SenderConnectionID)
             {
-                Packet.SetPacketTarget(connection.Key);
+                Packet.SetPacketTarget(CurrentConnectedClientConnectionIDs[i]);
                 SendPacketToClient(Packet, QosChannelID);
             }
         }
@@ -117,9 +120,9 @@ public class NetworkManager : MonoBehaviour
 
     public void SendPacketToAllClients(NetworkPacket Packet, int QosChannelID)
     {
-        foreach (KeyValuePair<int, Connection> connection in Connections)
+        for (int i = 0; i < CurrentConnectedClientConnectionIDs.Count; i++)
         {
-            Packet.SetPacketTarget(connection.Key);
+            Packet.SetPacketTarget(CurrentConnectedClientConnectionIDs[i]);
             SendPacketToClient(Packet, QosChannelID);    
         }
     }

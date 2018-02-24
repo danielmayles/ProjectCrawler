@@ -104,9 +104,9 @@ public class Player : Character
         InitalRightUpLegBonePosition = RightUpLegRigidBody.transform.localPosition;
     }
 
-    public void IsInRoom()
+    public void SetIsVisible(bool IsVisible)
     {
-        gameObject.SetActive(true);
+        gameObject.SetActive(IsVisible);
     }
 
     public void SetAlive()

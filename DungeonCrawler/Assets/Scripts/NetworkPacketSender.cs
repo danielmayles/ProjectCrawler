@@ -29,13 +29,12 @@ public class NetworkPacketSender : MonoBehaviour
         }
 
         Packet.SetIsTargetRoom(false);
-        Player[] Players = TargetRoom.GetPlayersInRoom();
-        for (int i = 0; i < Players.Length; i++)
+        int[] PlayerConnectionIDs = TargetRoom.GetPlayersInRoom();
+        for (int i = 0; i < PlayerConnectionIDs.Length; i++)
         {
-            Packet.SetPacketTarget(Players[i].GetPlayerConnectionID());
+            Packet.SetPacketTarget(PlayerConnectionIDs[i]);
             NetworkManager.Instance.SendPacketToClient(Packet, QualityOfServiceType);
         }
-
 #else
         Packet.SetPacketTarget(TargetRoom.GetRoomIndex());
         Packet.SetIsTargetRoom(true);
@@ -136,20 +135,21 @@ public class NetworkPacketSender : MonoBehaviour
         SendPacketToAllPlayers(networkPacket, QosType.Reliable, true);
     }
 
-    public static void AddPlayerToRoom(int PlayerConnectionID, int RoomIndex)
+    public static void AddPlayerToRoom(int PlayerConnectionID, int RoomIndex, Vector3 PlayerPosition)
     {
-        AddPlayerToRoom(PlayerConnectionID, LevelManager.Instance.GetRoom(RoomIndex));
+        AddPlayerToRoom(PlayerConnectionID, LevelManager.Instance.GetRoom(RoomIndex), PlayerPosition);
     }
 
-    public static void AddPlayerToRoom(int PlayerConnectionID, Room room)
+    public static void AddPlayerToRoom(int PlayerConnectionID, Room room, Vector3 PlayerPosition)
     {
         NetworkPacket networkPacket = ScriptableObject.CreateInstance<NetworkPacket>();
         networkPacket.PacketHeader = NetworkPacketHeader.AddPlayerToRoom;
         List<byte> data = new List<byte>();
         data.AddRange(BitConverter.GetBytes(PlayerConnectionID));
         data.AddRange(BitConverter.GetBytes(room.GetRoomIndex()));
+        data.AddRange(Serializer.GetBytes(PlayerPosition));
         networkPacket.SetPacketData(data.ToArray(), 0, data.Count);
-        RelayPacketToPlayersInRoom(networkPacket, room, QosType.Reliable, true);
+        RelayPacketToPlayersInRoom(networkPacket, room, QosType.Reliable, false);
     }
 
     public static void RemovePlayerFromRoom(int PlayerConnectionID, int RoomIndex)
@@ -165,7 +165,8 @@ public class NetworkPacketSender : MonoBehaviour
         data.AddRange(BitConverter.GetBytes(PlayerConnectionID));
         data.AddRange(BitConverter.GetBytes(room.GetRoomIndex()));
         networkPacket.SetPacketData(data.ToArray(), 0, data.Count);
-        RelayPacketToPlayersInRoom(networkPacket, room, QosType.Reliable, true);
+        networkPacket.SetPacketTarget(PlayerConnectionID);
+        RelayPacketToPlayersInRoom(networkPacket, room, QosType.Reliable, false);
     }
 
     public static void SpawnPlayerInRoom(int PlayerConnectionID, int RoomIndex)
@@ -213,7 +214,7 @@ public class NetworkPacketSender : MonoBehaviour
         networkPacket.PacketHeader = NetworkPacketHeader.RoomData;
         networkPacket.SetPacketTarget(PlayerConnectionID);
         List<byte> data = new List<byte>();
-        data.AddRange(LevelManager.Instance.GetRoomAsBytes(RoomIndex));
+        data.AddRange(LevelManager.Instance.GetRoom(RoomIndex).GetRoomAsBytes());
         networkPacket.SetPacketData(data.ToArray(), 0, data.Count);
         NetworkManager.Instance.SendPacketToClient(networkPacket, QosType.Reliable);
     }

@@ -15,4 +15,9 @@ public static class NetworkDetails
     {
         LocalConnectionID = ConnectionID;
     }
+
+    public static bool IsLocalConnectionID(int ConnectionID)
+    {
+        return LocalConnectionID == ConnectionID;
+    }
 }

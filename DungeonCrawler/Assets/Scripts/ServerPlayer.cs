@@ -30,16 +30,14 @@ public class ServerPlayer : Player
 
     public void OnTriggerEnter(Collider other)
     {
-        /*
         if(other.tag == "Room")
         {
             Room newRoom = other.GetComponent<Room>();
             if (CurrentRoom != newRoom)
             {
-                newRoom.PlayerJoinRoom(GetPlayerConnectionID());
-                NetworkPacketSender.AddPlayerToRoom(GetPlayerConnectionID(), newRoom);
+                CurrentRoom.PlayerLeaveRoom(GetPlayerConnectionID());
+                newRoom.PlayerJoinRoom(GetPlayerConnectionID(), transform.position);
             }
         }
-        */
     }
 }

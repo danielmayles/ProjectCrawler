@@ -77,6 +77,7 @@ public class PlayerManager : MonoBehaviour
         {
             Data.AddRange(BitConverter.GetBytes(PlayerConnectionID));
             Data.AddRange(BitConverter.GetBytes(Players[PlayerConnectionID].CurrentRoom.GetRoomIndex()));
+            Data.AddRange(Serializer.GetBytes(Players[PlayerConnectionID].transform.position));
         }
         return Data.ToArray();
     }
@@ -101,7 +102,11 @@ public class PlayerManager : MonoBehaviour
 
             int PlayerRoomIndex = BitConverter.ToInt32(Bytes, CurrentByteIndex);
             CurrentByteIndex += 4;
-            LevelManager.Instance.GetRoom(0).PlayerJoinRoom(PlayerConnectionIndex);
+
+            Vector3 PlayerPos = Serializer.DeserializeToVector3(Bytes, CurrentByteIndex);
+            CurrentByteIndex += 12;
+
+            LevelManager.Instance.GetRoom(0).PlayerJoinRoom(PlayerConnectionIndex, PlayerPos);
         }
     }
 

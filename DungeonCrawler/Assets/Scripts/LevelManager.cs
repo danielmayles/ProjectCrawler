@@ -77,31 +77,4 @@ public class LevelManager : MonoBehaviour
             SpawnRoom(RoomIndex, RoomPrefabIndex, RoomPosition);
         }
     }
-
-    public byte[] GetRoomAsBytes(int RoomIndex)
-    {
-        List<byte> Data = new List<byte>();
-        Data.AddRange(BitConverter.GetBytes(RoomIndex));
-
-        Player[] PlayersInRoom = Rooms[RoomIndex].GetPlayersInRoom();
-        Data.AddRange(BitConverter.GetBytes(PlayersInRoom.Length));
-        for (int i = 0; i < PlayersInRoom.Length; i++)
-        {
-            Data.AddRange(BitConverter.GetBytes(PlayersInRoom[i].GetPlayerConnectionID()));
-        }        
-        return Data.ToArray();
-    }
-
-    public void ReadInRoomAsBytes(byte[] RoomBytes)
-    {   
-        int RoomIndex = BitConverter.ToInt32(RoomBytes, 0);
-        CurrentRoom = SpawnRoom(RoomIndex, 0, Vector3.zero);
-
-        int PlayerCount = BitConverter.ToInt32(RoomBytes, 4);
-        for (int i = 0; i < PlayerCount; i++)
-        { 
-            int PlayerConnectionID = BitConverter.ToInt32(RoomBytes, 8 + (4 * i));
-            CurrentRoom.PlayerJoinRoom(PlayerConnectionID);
-        }
-    }
 }

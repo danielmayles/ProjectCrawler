@@ -170,8 +170,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   RoomPrefabs:
   - {fileID: 1467390009389356, guid: 83d7cbeb163792641947fd065da627c9, type: 2}
-  AmountOfRoomsHeigh: 10
-  AmountOfRoomsWidth: 10
 --- !u!4 &54094419
 Transform:
   m_ObjectHideFlags: 0
@@ -372,7 +370,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 10.286103
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -434,6 +432,7 @@ MonoBehaviour:
     type: 2}
   ServerPlayerPrefab: {fileID: 1169715698517496, guid: 89fd808fdcbf6ec479bd5dba507306d1,
     type: 2}
+  PlayerPoolSpawnPosition: {x: 0, y: 0, z: 0}
 --- !u!4 &1329674907
 Transform:
   m_ObjectHideFlags: 0

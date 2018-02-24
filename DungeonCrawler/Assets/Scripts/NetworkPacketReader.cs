@@ -92,7 +92,8 @@ public class NetworkPacketReader : MonoBehaviour
                 {
                     int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
                     int RoomIndex = BitConverter.ToInt32(Packet.GetPacketData(), 4);
-                    LevelManager.Instance.GetRoom(RoomIndex).PlayerJoinRoom(PlayerID);
+                    Vector3 PlayerPosition = Serializer.DeserializeToVector3(Packet.GetPacketData(), 8);
+                    LevelManager.Instance.GetRoom(RoomIndex).PlayerJoinRoom(PlayerID, PlayerPosition);
                 }
                 break;
 
@@ -106,9 +107,9 @@ public class NetworkPacketReader : MonoBehaviour
 
             case NetworkPacketHeader.SpawnPlayerInRoom:
                 {
-                    int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
-                    int RoomIndex = BitConverter.ToInt32(Packet.GetPacketData(), 4);
-                    LevelManager.Instance.GetRoom(RoomIndex).PlayerJoinRoom(PlayerID);
+                    //int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
+                    //int RoomIndex = BitConverter.ToInt32(Packet.GetPacketData(), 4);
+                    //LevelManager.Instance.GetRoom(RoomIndex).PlayerJoinRoom(PlayerID);
                 }
                 break;
 
@@ -133,7 +134,8 @@ public class NetworkPacketReader : MonoBehaviour
 
             case NetworkPacketHeader.RoomData:
                 {
-                    LevelManager.Instance.ReadInRoomAsBytes(Packet.GetPacketData());
+                    int RoomIndex = BitConverter.ToInt32(Packet.GetPacketData(), 0);
+                    LevelManager.Instance.GetRoom(RoomIndex).ReadInRoomAsBytes(Packet.GetPacketData());
                 }
                 break;
 

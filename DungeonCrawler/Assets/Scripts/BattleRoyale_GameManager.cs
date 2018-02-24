@@ -19,6 +19,6 @@ public class BattleRoyale_GameManager : MonoBehaviour
         NetworkPacketSender.SendLevelData(ConnectionID);
         NetworkPacketSender.SendPlayerData(ConnectionID);
         NetworkPacketSender.SendSpawnPlayer(ConnectionID);
-        NetworkPacketSender.AddPlayerToRoom(ConnectionID, 0);
+        LevelManager.Instance.GetRoom(0).PlayerJoinRoom(ConnectionID, Vector3.zero);
     }
 }
