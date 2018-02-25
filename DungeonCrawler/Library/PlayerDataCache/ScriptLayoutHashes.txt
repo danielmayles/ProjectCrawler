@@ -154,3 +154,4 @@ eb46c353d7148ca41699dfeb684941b7 Assembly-CSharp.dll:.ControllerablePlayer
 2d64d2dca450d6b0401f071bda168dbe Assembly-CSharp.dll:.Room
 f4c716750351514700c97dc0d70246d2 Assembly-CSharp.dll:.ClientNetworkManager
 eb46c353d7148ca41699dfeb684941b7 Assembly-CSharp.dll:.Player
+b22d5d46928d4a4fd4fdb5abd178656b Assembly-CSharp.dll:.CameraManager

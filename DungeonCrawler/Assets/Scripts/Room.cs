@@ -46,7 +46,7 @@ public class Room : MonoBehaviour
     public void PlayerJoinRoom(int PlayerConnectionID, Vector3 Position)
     {
         Player player = PlayerManager.Instance.GetPlayer(PlayerConnectionID);
-        player.CurrentRoom = this;
+        player.OnPlayerChangeRooms(this);
         if (!PlayerConnectionIDsInRoom.Contains(PlayerConnectionID))
         {
             PlayerConnectionIDsInRoom.Add(PlayerConnectionID);

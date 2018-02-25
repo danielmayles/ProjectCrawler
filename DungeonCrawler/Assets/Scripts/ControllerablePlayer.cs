@@ -58,4 +58,10 @@ public class ControllerablePlayer : Player
             transform.position = Position;
         }
     }
+
+    public override void OnPlayerChangeRooms(Room newRoom)
+    {
+        base.OnPlayerChangeRooms(newRoom);
+        CameraManager.Instance.ChangeCameraPosition(newRoom.transform.position);
+    }
 }

@@ -50,6 +50,12 @@ public class NetworkManager : MonoBehaviour
     private int UnreliableChannelId;
     private int socketId;
 
+    //Debug Varibles
+    int Debug_AmountOfPacketsSentPerSecond;
+    int Debug_AmountOfPacketsReceivedPerSecond;
+    int Debug_TotalSizeOfPacketsSentPerSecond;
+    int Debug_TotalSizeOfPacketsReceivedPerSecond;
+
     private void Awake()
     {
         if (Instance == null)
@@ -62,6 +68,7 @@ public class NetworkManager : MonoBehaviour
     {
         InitNetwork();
         StartCoroutine(NetworkUpdate());
+        StartCoroutine(NetworkDebugLoop());
     }
 
     void InitNetwork()
@@ -96,14 +103,24 @@ public class NetworkManager : MonoBehaviour
 
     public void SendPacketToClient(NetworkPacket packet, int QosChannelID)
     {
+        Debug.Log("Sent Packet: " + packet.PacketHeader + " Size: " + packet.GetDataSize());
+
         byte error;
         NetworkTransport.Send(socketId, packet.GetPacketTarget(), QosChannelID, packet.GetBytes(), packet.GetTotalPacketSize(), out error);
+
+        Debug_AmountOfPacketsSentPerSecond++;
+        Debug_TotalSizeOfPacketsSentPerSecond += packet.GetTotalPacketSize();
     }
 
     public void SendPacketToClient(NetworkPacket packet, QosType QosChannel)
     {
+        Debug.Log("Sent Packet: " + packet.PacketHeader + " Size: " + packet.GetDataSize());
+
         byte error;
         NetworkTransport.Send(socketId, packet.GetPacketTarget(), GetChannel(QosChannel), packet.GetBytes(), packet.GetTotalPacketSize(), out error);
+
+        Debug_AmountOfPacketsSentPerSecond++;
+        Debug_TotalSizeOfPacketsSentPerSecond += packet.GetTotalPacketSize();
     }
 
     public void RelayPacketToAllClients(NetworkPacket Packet, int SenderConnectionID, int QosChannelID)
@@ -195,6 +212,7 @@ public class NetworkManager : MonoBehaviour
                     RecPacket.PacketHeader = (NetworkPacketHeader)BitConverter.ToInt32(recBuffer, 4);
                     RecPacket.SetIsTargetRoom(BitConverter.ToBoolean(recBuffer, 8));
                     RecPacket.SetPacketData(recBuffer, 13, BitConverter.ToInt32(recBuffer, 9));
+                    Debug.Log("Received Packet: " + RecPacket.PacketHeader + " Size: " + RecPacket.GetDataSize());
                     NetworkPacketReader.ReadPacket(RecPacket, recConnectionId, true);
               
                     if (RecPacket.GetPacketTarget() != (int)PacketTargets.ServerOnly)
@@ -212,6 +230,9 @@ public class NetworkManager : MonoBehaviour
                             SendPacketToClient(RecPacket, recChannelId);
                         }
                     }
+               
+                    Debug_AmountOfPacketsReceivedPerSecond++;
+                    Debug_TotalSizeOfPacketsReceivedPerSecond += RecPacket.GetTotalPacketSize();
                     break;
                 case NetworkEventType.DisconnectEvent:
                     RemoveConnection(recHostId);
@@ -219,6 +240,24 @@ public class NetworkManager : MonoBehaviour
                     break;
             }
             yield return new WaitForEndOfFrame();
+        }
+    }
+
+    IEnumerator NetworkDebugLoop()
+    {
+        while(true)
+        {
+            yield return new WaitForSeconds(1);
+            //Debug.Log("Server - Amount of Packets Received Per Second: " + Debug_AmountOfPacketsReceivedPerSecond);
+            //Debug.Log("Server - Amount of Packets Sent Per Second: " + Debug_AmountOfPacketsSentPerSecond);
+
+           // Debug.Log("Server - Total Size of Packets Received Per Second: " + Debug_TotalSizeOfPacketsReceivedPerSecond);
+           // Debug.Log("Server - Total Size of Packets Sent Per Second: " + Debug_TotalSizeOfPacketsSentPerSecond);
+
+            Debug_AmountOfPacketsReceivedPerSecond = 0;
+            Debug_AmountOfPacketsSentPerSecond = 0;
+            Debug_TotalSizeOfPacketsReceivedPerSecond = 0;
+            Debug_TotalSizeOfPacketsSentPerSecond = 0;
         }
     }
 }

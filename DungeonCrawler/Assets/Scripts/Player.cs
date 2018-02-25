@@ -147,6 +147,11 @@ public class Player : Character
         CurrentHeadUprightForce = 0;
     }
 
+    public virtual void OnPlayerChangeRooms(Room newRoom)
+    {
+        CurrentRoom = newRoom;
+    }
+
     public virtual void UpdatePlayer(InputType[] PlayerInputs, int InputID, float DeltaTime)
     {
 
