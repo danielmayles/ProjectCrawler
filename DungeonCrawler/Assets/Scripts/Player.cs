@@ -53,17 +53,17 @@ public class Player : Character
 
     protected Vector3 CurrentVelocity;
 
-    public float MaxHeadUprightForce;
-    public float CurrentHeadUprightForce;
     private int ConnectionID;
     protected bool isRagdolling;
 
     protected Vector3 OldPos;
     protected Vector3 OldRot;
+
+    protected Vector3 CurrentArmDirection;
+    public PlayerIKController IKController;
     
     protected void Start()
     {
-        CurrentHeadUprightForce = MaxHeadUprightForce;
         StoreInitalRotations();
         StoreInitalPositions();
     }
@@ -136,6 +136,12 @@ public class Player : Character
         transform.eulerAngles = Rotation;
     }
 
+    public virtual void SetArmDirection(Vector3 ArmDirection,  int InputID)
+    {
+        CurrentArmDirection = ArmDirection;
+        IKController.SetHandTargetPositions(ArmDirection, ArmDirection);
+    }
+
     public virtual void Ragdoll()
     {
         isRagdolling = true;
@@ -144,7 +150,6 @@ public class Player : Character
         LeftUpLegRigidBody.isKinematic = false;
         RightLegRigidBody.isKinematic = false;
         RightUpLegRigidBody.isKinematic = false;
-        CurrentHeadUprightForce = 0;
     }
 
     public virtual void OnPlayerChangeRooms(Room newRoom)
@@ -152,7 +157,7 @@ public class Player : Character
         CurrentRoom = newRoom;
     }
 
-    public virtual void UpdatePlayer(InputType[] PlayerInputs, int InputID, float DeltaTime)
+    public virtual void UpdatePlayer(byte[] PlayerInputData, int AmountOfInputs, int InputID, float DeltaTime)
     {
 
     }

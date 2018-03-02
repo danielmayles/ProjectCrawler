@@ -95,6 +95,18 @@ public class NetworkPacketSender : MonoBehaviour
         RelayPacketToPlayersInRoom(networkPacket, PlayersCurrentRoom, QosType.Unreliable, false);
     }
 
+    public static void SendPlayerArmDirection(int PlayerConnectionID, int InputID, Vector3 ArmDirection, Room PlayersCurrentRoom)
+    {
+        NetworkPacket networkPacket = ScriptableObject.CreateInstance<NetworkPacket>();
+        networkPacket.PacketHeader = NetworkPacketHeader.ArmDirection;
+        List<byte> data = new List<byte>();
+        data.AddRange(BitConverter.GetBytes(PlayerConnectionID));
+        data.AddRange(BitConverter.GetBytes(InputID));
+        data.AddRange(Serializer.GetBytes(ArmDirection));
+        networkPacket.SetPacketData(data.ToArray(), 0, data.Count);
+        RelayPacketToPlayersInRoom(networkPacket, PlayersCurrentRoom, QosType.Unreliable, false);
+    }
+
     public static void SendPlayerTransform(int PlayerConnectionID, Transform PlayerTransform)
     {
         NetworkPacket networkPacket = ScriptableObject.CreateInstance<NetworkPacket>();
@@ -107,7 +119,7 @@ public class NetworkPacketSender : MonoBehaviour
         SendPacketToAllPlayers(networkPacket, QosType.Unreliable, true);
     }
 
-    public static void SendPlayerInput(int PlayerConnectionID, List<InputType> Inputs, int InputID, float DeltaTime)
+    public static void SendPlayerInput(int PlayerConnectionID, List<byte> InputData, int AmountOfInputs ,int InputID, float DeltaTime)
     {
         NetworkPacket networkPacket = ScriptableObject.CreateInstance<NetworkPacket>();
         networkPacket.PacketHeader = NetworkPacketHeader.PlayerInputUpdate;
@@ -115,14 +127,11 @@ public class NetworkPacketSender : MonoBehaviour
         data.AddRange(BitConverter.GetBytes(PlayerConnectionID));
         data.AddRange(BitConverter.GetBytes(DeltaTime));
         data.AddRange(BitConverter.GetBytes(InputID));
-        data.AddRange(BitConverter.GetBytes(Inputs.Count));
-        for(int i = 0; i < Inputs.Count; i++)
-        {
-            data.AddRange(BitConverter.GetBytes((int)Inputs[i]));
-        }
+        data.AddRange(BitConverter.GetBytes(AmountOfInputs));
+        data.AddRange(InputData);
+        
         networkPacket.SetPacketData(data.ToArray(), 0, data.Count);
         SendToServerOnly(networkPacket, QosType.Reliable);
-        Inputs.Clear();
     }
 
     public static void SendRagdollPlayer(int PlayerConnectionID)

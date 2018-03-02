@@ -14,7 +14,7 @@ ff05dcdf90651c3d98a9cad3df5e471e UnityEngine.Timeline.dll:UnityEngine.Timeline.C
 6af7378a45ad6da4992a71ef50ddc2eb UnityEngine.Timeline.dll:UnityEngine.Timeline.GroupTrack
 6af7378a45ad6da4992a71ef50ddc2eb UnityEngine.Timeline.dll:UnityEngine.Timeline.PlayableTrack
 9ca6347af5ceb6b0d1c105af31b6722e UnityEngine.Timeline.dll:UnityEngine.Timeline.TimelineAsset
-eb46c353d7148ca41699dfeb684941b7 Assembly-CSharp.dll:.ServerPlayer
+d239ead07c71412a9fb639c9a27a03b7 Assembly-CSharp.dll:.ServerPlayer
 a35dc9cca2faebc5f5f1aeb9e8e47bbe UnityEngine.UI.dll:UnityEngine.UI.AspectRatioFitter
 05524b8f659e7bfe5756d1335fec24ba UnityEngine.UI.dll:UnityEngine.EventSystems.BaseInput
 49cd62a578efc0a599b810a2b66cd49c UnityEngine.UI.dll:UnityEngine.UI.Button
@@ -118,8 +118,10 @@ c2275a8bfbb9f9942cad75ecdfded41d UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.Spa
 45f3431f0103c41611e8d4eec3d439df UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.SpatialMappingRenderer
 4da119314e295c3f43fe005e2e0001ce Assembly-CSharp.dll:.Connection
 116151bd8a95aa5015eae73c402eab17 Assembly-CSharp.dll:.NetworkManager
+05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.PlayerIKController
 05524b8f659e7bfe5756d1335fec24ba UnityEngine.Advertisements.dll:UnityEngine.Advertisements.CallbackExecutor
 05524b8f659e7bfe5756d1335fec24ba UnityEngine.Advertisements.dll:UnityEngine.Advertisements.Editor.Placeholder
+b22d5d46928d4a4fd4fdb5abd178656b Assembly-CSharp.dll:.CameraManager
 fc1e0f4d8439d9928083474691511a13 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkAnimator
 05524b8f659e7bfe5756d1335fec24ba UnityEngine.Networking.dll:UnityEngine.Networking.NetworkBehaviour
 60b2bb652410a5867a5ab9a01cd38461 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkDiscovery
@@ -149,9 +151,8 @@ c2275a8bfbb9f9942cad75ecdfded41d UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.Spa
 9de3a22eca9aefadba2d10d5987cefe3 UnityEngine.SpatialTracking.dll:UnityEngine.SpatialTracking.TrackedPoseDriver
 aa20b59c8dfb9aeff5ec5aeffb1af1e4 Assembly-CSharp.dll:.LevelManager
 c83fd952c09eb731122c1af46e36b19a Assembly-CSharp.dll:.NetworkEnabler
-eb46c353d7148ca41699dfeb684941b7 Assembly-CSharp.dll:.ControllerablePlayer
+d239ead07c71412a9fb639c9a27a03b7 Assembly-CSharp.dll:.ControllerablePlayer
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.BattleRoyale_GameManager
 2d64d2dca450d6b0401f071bda168dbe Assembly-CSharp.dll:.Room
 f4c716750351514700c97dc0d70246d2 Assembly-CSharp.dll:.ClientNetworkManager
-eb46c353d7148ca41699dfeb684941b7 Assembly-CSharp.dll:.Player
-b22d5d46928d4a4fd4fdb5abd178656b Assembly-CSharp.dll:.CameraManager
+d239ead07c71412a9fb639c9a27a03b7 Assembly-CSharp.dll:.Player

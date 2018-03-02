@@ -15,6 +15,7 @@ public enum NetworkPacketHeader
     SpawnRoom,
     PlayerPosition,
     PlayerTransform,
+    ArmDirection,
     RagdollPlayer,
     PlayerInputUpdate,
     PlayerPositionUpdate,

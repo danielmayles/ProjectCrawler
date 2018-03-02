@@ -56,6 +56,15 @@ public class NetworkPacketReader : MonoBehaviour
                 }
                 break;
 
+            case NetworkPacketHeader.ArmDirection:
+                {
+                    int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
+                    int InputID = BitConverter.ToInt32(Packet.GetPacketData(), 4);
+                    Vector3 ArmDirection = Serializer.DeserializeToVector3(Packet.GetPacketData(), 8);
+                    PlayerManager.Instance.GetPlayer(PlayerID).SetArmDirection(ArmDirection, InputID);
+                }
+                break;
+
             case NetworkPacketHeader.PlayerTransform:
                 {
                     int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
@@ -78,13 +87,8 @@ public class NetworkPacketReader : MonoBehaviour
                     float DeltaTime = BitConverter.ToSingle(Packet.GetPacketData(), 4);
                     int InputID = BitConverter.ToInt32(Packet.GetPacketData(), 8);
                     int AmountOfInputs = BitConverter.ToInt32(Packet.GetPacketData(), 12);
-                    InputType[] PlayerInputs = new InputType[AmountOfInputs];
-                    for(int i = 0; i < AmountOfInputs; i++)
-                    {
-                        PlayerInputs[i] = (InputType)BitConverter.ToInt32(Packet.GetPacketData(), 16 + (4 * i));
-                    }
-
-                    PlayerManager.Instance.GetPlayer(PlayerID).UpdatePlayer(PlayerInputs, InputID, DeltaTime);
+            
+                    PlayerManager.Instance.GetPlayer(PlayerID).UpdatePlayer(Packet.GetPacketData(), AmountOfInputs, InputID, DeltaTime);
                 }
                 break;
 

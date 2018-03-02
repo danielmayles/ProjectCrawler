@@ -296,6 +296,7 @@
     <Compile Include="Assets\Scripts\NetworkPacketReader.cs" />
     <Compile Include="Assets\Scripts\NetworkPacketSender.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
+    <Compile Include="Assets\Scripts\PlayerIKController.cs" />
     <Compile Include="Assets\Scripts\PlayerManager.cs" />
     <Compile Include="Assets\Scripts\Room.cs" />
     <Compile Include="Assets\Scripts\Serializer.cs" />

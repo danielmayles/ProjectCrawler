@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,43 +7,64 @@ public enum InputType
 {
     Left,
     Right,
-    Jump
+    Jump,
+    ArmDirection,
 }
 
 public class ControllerablePlayer : Player
 {
-    List<InputType> InputsToSendToServer = new List<InputType>();
+    List<byte> InputsToSendToServer = new List<byte>();
     private int CurrentInputID;
-
+    private Vector3 LastArmDirection;
+    private int CurrentAmountOfInputs;
     void FixedUpdate()
-    { 
-        bool InputKeyPressed = false;
+    {
+        CurrentAmountOfInputs = 0;
         if (Input.GetKey(KeyCode.A))
         {
-            InputKeyPressed = true;
-            InputsToSendToServer.Add(InputType.Left);
+            CurrentAmountOfInputs++;
+            InputsToSendToServer.AddRange(BitConverter.GetBytes((int)InputType.Left));
             CurrentVelocity -= Speed * Vector3.right;
         }
         if (Input.GetKey(KeyCode.D))
         {
-            InputKeyPressed = true;
-            InputsToSendToServer.Add(InputType.Right);
+            CurrentAmountOfInputs++;
+            InputsToSendToServer.AddRange(BitConverter.GetBytes((int)(InputType.Right)));
             CurrentVelocity += Speed * Vector3.right;
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            InputKeyPressed = true;
-            InputsToSendToServer.Add(InputType.Jump);
+            CurrentAmountOfInputs++;
+            InputsToSendToServer.AddRange(BitConverter.GetBytes((int)InputType.Jump));
             CurrentVelocity += JumpForce * Vector3.up;
         }
 
-        if (InputKeyPressed)
+        UpdateArmDirection();
+        if(LastArmDirection != CurrentArmDirection)
+        {
+            CurrentAmountOfInputs++;
+            InputsToSendToServer.AddRange(BitConverter.GetBytes((int)(InputType.ArmDirection)));
+            InputsToSendToServer.AddRange(Serializer.GetBytes(CurrentArmDirection));
+            LastArmDirection = CurrentArmDirection;
+        }
+
+        if (CurrentAmountOfInputs > 0)
         {
             CurrentInputID++;
             transform.position += CurrentVelocity * Time.deltaTime;
             CurrentVelocity = Vector3.zero;
-            NetworkPacketSender.SendPlayerInput(GetPlayerConnectionID(), InputsToSendToServer, CurrentInputID, Time.deltaTime);         
+            NetworkPacketSender.SendPlayerInput(GetPlayerConnectionID(), InputsToSendToServer, CurrentAmountOfInputs, CurrentInputID, Time.deltaTime);
+            InputsToSendToServer.Clear();
         }
+    }
+
+    public void UpdateArmDirection()
+    {
+        Vector3 MousePosWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        MousePosWorld.z = transform.position.z;
+        Vector3 Dir = (MousePosWorld - transform.position).normalized;
+        CurrentArmDirection = transform.position + (Dir * 10);
+        IKController.SetHandTargetPositions(CurrentArmDirection, CurrentArmDirection);
     }
 
     public override void Ragdoll()
@@ -56,6 +78,14 @@ public class ControllerablePlayer : Player
         if(CurrentInputID == InputID && transform.position != Position)
         {
             transform.position = Position;
+        }
+    }
+
+    public override void SetArmDirection(Vector3 ArmDirection, int InputID)
+    {
+        if (CurrentInputID == InputID && ArmDirection != CurrentArmDirection)
+        {
+            base.SetArmDirection(ArmDirection, InputID);
         }
     }
 
