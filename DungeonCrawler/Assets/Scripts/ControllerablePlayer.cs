@@ -17,6 +17,7 @@ public class ControllerablePlayer : Player
     private int CurrentInputID;
     private Vector3 LastArmDirection;
     private int CurrentAmountOfInputs;
+
     void FixedUpdate()
     {
         CurrentAmountOfInputs = 0;
@@ -73,20 +74,22 @@ public class ControllerablePlayer : Player
         NetworkPacketSender.SendRagdollPlayer(GetPlayerConnectionID());
     }
 
-    public override void SetPosition(Vector3 Position, int InputID)
+    public override void PlayerUpdate(int InputID, Vector3 Pos, Vector3 Dir, Vector3 ArmDir)
     {
-        if(CurrentInputID == InputID && transform.position != Position)
-        {
-            transform.position = Position;
+        if (CurrentInputID == InputID)
+        {   
+            base.PlayerUpdate(InputID, Pos, Dir, ArmDir);
         }
     }
 
-    public override void SetArmDirection(Vector3 ArmDirection, int InputID)
+    public override void SetPosition(Vector3 Position)
     {
-        if (CurrentInputID == InputID && ArmDirection != CurrentArmDirection)
-        {
-            base.SetArmDirection(ArmDirection, InputID);
-        }
+       transform.position = Position;
+    }
+
+    public override void SetArmDirection(Vector3 ArmDirection)
+    {
+        base.SetArmDirection(ArmDirection);
     }
 
     public override void OnPlayerChangeRooms(Room newRoom)

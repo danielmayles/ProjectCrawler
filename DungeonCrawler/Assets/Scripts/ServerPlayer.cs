@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class ServerPlayer : Player
 {
-    public override void UpdatePlayer(byte[] PlayerInputData, int AmountOfInputs, int InputID, float DeltaTime)
+    public override void ReceiveInputs(byte[] PlayerInputData, int AmountOfInputs, int InputID, float DeltaTime)
     {
         InputType[] PlayerInputs = new InputType[AmountOfInputs];
 
@@ -37,7 +37,7 @@ public class ServerPlayer : Player
 
                 case InputType.ArmDirection:
                     {
-                        SetArmDirection(Serializer.DeserializeToVector3(PlayerInputData, CurrentByteIndex), InputID);
+                        SetArmDirection(Serializer.DeserializeToVector3(PlayerInputData, CurrentByteIndex));
                         CurrentByteIndex += 12;
                     }
                     break;
@@ -45,8 +45,9 @@ public class ServerPlayer : Player
         }
 
         transform.position += CurrentVelocity * DeltaTime;
-        NetworkPacketSender.SendPlayerArmDirection(GetPlayerConnectionID(), InputID, CurrentArmDirection, CurrentRoom);
-        NetworkPacketSender.SendPlayerPosition(GetPlayerConnectionID(), InputID, transform.position, CurrentRoom);
+        NetworkPacketSender.SendUpdatePlayer(GetPlayerConnectionID(), InputID, transform.position, transform.forward, CurrentArmDirection, CurrentRoom);
+        //NetworkPacketSender.SendPlayerArmDirection(GetPlayerConnectionID(), InputID, CurrentArmDirection, CurrentRoom);
+        //NetworkPacketSender.SendPlayerPosition(GetPlayerConnectionID(), InputID, transform.position, CurrentRoom);
         CurrentVelocity = Vector3.zero;
     }
 

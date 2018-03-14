@@ -124,7 +124,7 @@ public class Player : Character
         return ConnectionID;
     }
 
-    public virtual void SetPosition(Vector3 Position, int InputID)
+    public virtual void SetPosition(Vector3 Position)
     {
         transform.position = Position;
     }
@@ -136,7 +136,7 @@ public class Player : Character
         transform.eulerAngles = Rotation;
     }
 
-    public virtual void SetArmDirection(Vector3 ArmDirection,  int InputID)
+    public virtual void SetArmDirection(Vector3 ArmDirection)
     {
         CurrentArmDirection = ArmDirection;
         IKController.SetHandTargetPositions(ArmDirection, ArmDirection);
@@ -152,12 +152,20 @@ public class Player : Character
         RightUpLegRigidBody.isKinematic = false;
     }
 
+    public virtual void PlayerUpdate(int InputID, Vector3 Pos, Vector3 Dir, Vector3 ArmDir)
+    {
+        transform.position = Pos;
+        transform.forward = Dir;
+        CurrentArmDirection = ArmDir;
+        IKController.SetHandTargetPositions(ArmDir, ArmDir);
+    }
+
     public virtual void OnPlayerChangeRooms(Room newRoom)
     {
         CurrentRoom = newRoom;
     }
 
-    public virtual void UpdatePlayer(byte[] PlayerInputData, int AmountOfInputs, int InputID, float DeltaTime)
+    public virtual void ReceiveInputs(byte[] PlayerInputData, int AmountOfInputs, int InputID, float DeltaTime)
     {
 
     }

@@ -52,7 +52,7 @@ public class NetworkPacketReader : MonoBehaviour
                     int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
                     int InputID = BitConverter.ToInt32(Packet.GetPacketData(), 4);
                     Vector3 position = Serializer.DeserializeToVector3(Packet.GetPacketData(), 8);
-                    PlayerManager.Instance.GetPlayer(PlayerID).SetPosition(position, InputID);
+                    PlayerManager.Instance.GetPlayer(PlayerID).SetPosition(position);
                 }
                 break;
 
@@ -61,7 +61,7 @@ public class NetworkPacketReader : MonoBehaviour
                     int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
                     int InputID = BitConverter.ToInt32(Packet.GetPacketData(), 4);
                     Vector3 ArmDirection = Serializer.DeserializeToVector3(Packet.GetPacketData(), 8);
-                    PlayerManager.Instance.GetPlayer(PlayerID).SetArmDirection(ArmDirection, InputID);
+                    PlayerManager.Instance.GetPlayer(PlayerID).SetArmDirection(ArmDirection);
                 }
                 break;
 
@@ -71,6 +71,16 @@ public class NetworkPacketReader : MonoBehaviour
                     Vector3 position = Serializer.DeserializeToVector3(Packet.GetPacketData(), 4);
                     Vector3 rotation = Serializer.DeserializeToVector3(Packet.GetPacketData(), 16);
                     PlayerManager.Instance.GetPlayer(PlayerID).SetTransform(position, rotation);
+                }
+                break;
+
+            case NetworkPacketHeader.PlayerUpdate:
+                {
+                    int PlayerID = BitConverter.ToInt32(Packet.GetPacketData(), 0);
+                    int InputID = BitConverter.ToInt32(Packet.GetPacketData(), 4);
+                    Vector3 position = Serializer.DeserializeToVector3(Packet.GetPacketData(), 8);
+                    Vector3 ForwardVector = Serializer.DeserializeToVector3(Packet.GetPacketData(), 20);
+                    Vector3 CurrentArmDir = Serializer.DeserializeToVector3(Packet.GetPacketData(), 32);
                 }
                 break;
 
@@ -88,7 +98,7 @@ public class NetworkPacketReader : MonoBehaviour
                     int InputID = BitConverter.ToInt32(Packet.GetPacketData(), 8);
                     int AmountOfInputs = BitConverter.ToInt32(Packet.GetPacketData(), 12);
             
-                    PlayerManager.Instance.GetPlayer(PlayerID).UpdatePlayer(Packet.GetPacketData(), AmountOfInputs, InputID, DeltaTime);
+                    PlayerManager.Instance.GetPlayer(PlayerID).ReceiveInputs(Packet.GetPacketData(), AmountOfInputs, InputID, DeltaTime);
                 }
                 break;
 

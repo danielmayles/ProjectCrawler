@@ -13,6 +13,7 @@ public enum NetworkPacketHeader
     StartGame,
     SpawnPlayer,
     SpawnRoom,
+    PlayerUpdate,
     PlayerPosition,
     PlayerTransform,
     ArmDirection,

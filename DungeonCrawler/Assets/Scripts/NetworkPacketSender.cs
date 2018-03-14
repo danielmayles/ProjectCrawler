@@ -237,12 +237,25 @@ public class NetworkPacketSender : MonoBehaviour
 
     public static void SendPlayerData(int ConnectionID)
     {
-        //QQQ Players not being transfered properly on first play
         byte[] PlayerData = PlayerManager.Instance.GetPlayersAsBytes();
         NetworkPacket networkPacket = ScriptableObject.CreateInstance<NetworkPacket>();
         networkPacket.SetPacketTarget(ConnectionID);
         networkPacket.PacketHeader = NetworkPacketHeader.PlayerData;
         networkPacket.SetPacketData(PlayerData, 0, PlayerData.Length);
         NetworkManager.Instance.SendPacketToClient(networkPacket, QosType.Reliable);
+    }
+
+    public static void SendUpdatePlayer(int PlayerConnectionID, int InputID, Vector3 Position, Vector3 ForwardVector, Vector3 CurrentArmDirection, Room CurrentRoom)
+    {
+        NetworkPacket networkPacket = ScriptableObject.CreateInstance<NetworkPacket>();
+        networkPacket.PacketHeader = NetworkPacketHeader.PlayerUpdate;
+        List<byte> data = new List<byte>();
+        data.AddRange(BitConverter.GetBytes(PlayerConnectionID));
+        data.AddRange(BitConverter.GetBytes(InputID));
+        data.AddRange(Serializer.GetBytes(Position));
+        data.AddRange(Serializer.GetBytes(ForwardVector));
+        data.AddRange(Serializer.GetBytes(CurrentArmDirection));
+        networkPacket.SetPacketData(data.ToArray(), 0, data.Count);
+        RelayPacketToPlayersInRoom(networkPacket, CurrentRoom, QosType.Unreliable, false);
     }
 }
